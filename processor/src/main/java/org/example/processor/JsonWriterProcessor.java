@@ -63,9 +63,9 @@ public class JsonWriterProcessor extends AbstractProcessor {
 
     TypeElement te = (TypeElement) e;
 
-    List<Property> jsonNodeForNameMap = getJsonNodeForNameMap(te);
+    List<Property> properties = getProperties(te);
 
-    if (jsonNodeForNameMap.isEmpty()) {
+    if (properties.isEmpty()) {
       return;
     }
 
@@ -111,22 +111,49 @@ public class JsonWriterProcessor extends AbstractProcessor {
       out.println(" {");
       out.println();
 
-      toMap(jsonNodeForNameMap, simpleClassName, out);
-      out.println();
+      if (hasOnlyPrimitiveAttributes(properties)) {
+        toMap(properties, simpleClassName, out);
+        out.println();
+
+        fromMap(properties, simpleClassName, out);
+        out.println();
+      }
 
       toJson(simpleClassName, out);
       out.println();
 
-      toJsonNode(jsonNodeForNameMap, simpleClassName, out);
+      toJsonNode(properties, simpleClassName, out);
       out.println();
 
       out.println("}");
     }
   }
 
-  private void toMap(List<Property> jsonNodeForNameMap, String simpleClassName, PrintWriter out) {
-    List<Property> simpleProperties =
-        jsonNodeForNameMap.stream().filter(p -> !p.isComplex()).toList();
+  private boolean hasOnlyPrimitiveAttributes(List<Property> properties) {
+    for (Property property : properties) {
+      if (property.isComplex()) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  private void fromMap(List<Property> properties, String simpleClassName, PrintWriter out) {
+    out.println("\tpublic static " + simpleClassName + " fromMap(Map<String, String> in) {");
+
+    List<Property> simpleProperties = properties.stream().filter(p -> !p.isComplex()).toList();
+
+    simpleProperties.forEach(prim -> out.println("\t\t" + primitiveFromString(prim)));
+
+    String varNames = String.join(",", simpleProperties.stream().map(Property::name).toList());
+    out.println("\t\treturn new " + simpleClassName + "(" + varNames + ");");
+
+    out.println("\t}");
+  }
+
+  private void toMap(List<Property> properties, String simpleClassName, PrintWriter out) {
+    List<Property> simpleProperties = properties.stream().filter(p -> !p.isComplex()).toList();
 
     simpleProperties.stream()
         .map(
@@ -163,6 +190,56 @@ public class JsonWriterProcessor extends AbstractProcessor {
     out.println("\t}");
   }
 
+  private String primitiveFromString(Property property) {
+    return switch (property.kind()) {
+      case BOOLEAN -> "boolean "
+          + property.name()
+          + " = Boolean.getBoolean(in.get("
+          + property.name().toUpperCase(Locale.ROOT)
+          + "));";
+      case BYTE -> "byte "
+          + property.name()
+          + " = Base64.getDecoder().decode(in.get("
+          + property.name().toUpperCase(Locale.ROOT)
+          + "))[0];";
+      case SHORT -> "short "
+          + property.name()
+          + " = Short.parseShort(in.get("
+          + property.name().toUpperCase(Locale.ROOT)
+          + "));";
+      case INT -> "int "
+          + property.name()
+          + " = Integer.parseInt(in.get("
+          + property.name().toUpperCase(Locale.ROOT)
+          + "));";
+      case LONG -> "long "
+          + property.name()
+          + " = Long.parseLong(in.get("
+          + property.name().toUpperCase(Locale.ROOT)
+          + "));";
+      case CHAR -> "char "
+          + property.name()
+          + " = in.get("
+          + property.name().toUpperCase(Locale.ROOT)
+          + ").charAt(0);";
+      case FLOAT -> "float "
+          + property.name()
+          + " = Float.parseFloat(in.get("
+          + property.name().toUpperCase(Locale.ROOT)
+          + "));";
+      case DOUBLE -> "double "
+          + property.name()
+          + " = Double.parseDouble(in.get("
+          + property.name().toUpperCase(Locale.ROOT)
+          + "));";
+      default -> "String "
+          + property.name()
+          + " = in.get("
+          + property.name().toUpperCase(Locale.ROOT)
+          + ");";
+    };
+  }
+
   private String primitiveToString(Property property) {
     return switch (property.kind()) {
       case BOOLEAN -> "Boolean.toString(in." + property.name() + "())";
@@ -177,11 +254,10 @@ public class JsonWriterProcessor extends AbstractProcessor {
     };
   }
 
-  private void toJsonNode(
-      List<Property> jsonNodeForNameMap, String simpleClassName, PrintWriter out) {
+  private void toJsonNode(List<Property> properties, String simpleClassName, PrintWriter out) {
     out.println("\tstatic JsonNode toJsonNode(ObjectNode root, " + simpleClassName + " in) {");
 
-    for (Property property : jsonNodeForNameMap) {
+    for (Property property : properties) {
       if (Boolean.FALSE.equals(property.isComplex())) {
         if (property.kind == TypeKind.CHAR) {
           out.println(
@@ -228,8 +304,8 @@ public class JsonWriterProcessor extends AbstractProcessor {
     out.println("\t}");
   }
 
-  private List<Property> getJsonNodeForNameMap(Element e) {
-    List<Property> vars = new ArrayList<>();
+  private List<Property> getProperties(Element e) {
+    List<Property> properties = new ArrayList<>();
 
     List<? extends Element> recordComponents =
         e.getEnclosedElements().stream()
@@ -252,14 +328,14 @@ public class JsonWriterProcessor extends AbstractProcessor {
 
         // we can put strings
         if (typeString.equals("java.lang.String")) {
-          vars.add(new Property(varName.toString(), false, null, kind));
+          properties.add(new Property(varName.toString(), false, null, kind));
         }
 
         String participatingPackage = processingEnv.getOptions().get(PACKAGE);
 
         if (participatingPackage != null && typeString.startsWith(participatingPackage)) {
           String name = typeString.substring(typeString.lastIndexOf('.') + 1);
-          vars.add(new Property(varName.toString(), true, name, kind));
+          properties.add(new Property(varName.toString(), true, name, kind));
         }
 
         // todo
@@ -270,14 +346,14 @@ public class JsonWriterProcessor extends AbstractProcessor {
         //    continue;
         //  }
       } else if (kind.isPrimitive()) {
-        vars.add(new Property(varName.toString(), false, null, kind));
+        properties.add(new Property(varName.toString(), false, null, kind));
       } else {
         String msg = String.format("unsupported kind: %s", kind);
         LOGGER.info(msg);
       }
     }
 
-    return vars;
+    return properties;
   }
 
   private record Property(String name, boolean isComplex, String className, TypeKind kind) {}

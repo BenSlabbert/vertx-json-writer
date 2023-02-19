@@ -17,10 +17,6 @@ public class App {
     byte[] bytes = PersonJsonWriter.toJson(new Person("person1", 1, true, new Job("job2")));
     System.err.println(new String(bytes));
 
-    Map<String, String> stringStringMap =
-        PersonJsonWriter.toMap(new Person("person2", 2, false, new Job("job3")));
-    System.err.println(stringStringMap);
-
     PrimitiveEntity c =
         new PrimitiveEntity("name", 1, true, 1.2F, 3.7, (short) 2, 'c', (byte) 0x11, 6L);
 
