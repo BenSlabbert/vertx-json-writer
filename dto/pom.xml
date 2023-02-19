@@ -38,6 +38,9 @@
           <annotationProcessors>
             <annotationProcessor>org.example.processor.JsonWriterProcessor</annotationProcessor>
           </annotationProcessors>
+          <compilerArgs>
+            <arg>-Apackage=org.example.dto</arg>
+          </compilerArgs>
         </configuration>
       </plugin>
     </plugins>

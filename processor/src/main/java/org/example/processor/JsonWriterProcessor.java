@@ -8,6 +8,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Logger;
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.Processor;
 import javax.annotation.processing.RoundEnvironment;
@@ -28,6 +29,15 @@ import javax.tools.JavaFileObject;
 @AutoService(Processor.class)
 public class JsonWriterProcessor extends AbstractProcessor {
 
+  private static final Logger LOGGER = Logger.getLogger(JsonWriterProcessor.class.getName());
+
+  private static final String PACKAGE = "package";
+
+  @Override
+  public Set<String> getSupportedOptions() {
+    return Set.of(PACKAGE);
+  }
+
   @Override
   public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
     for (TypeElement annotation : annotations) {
@@ -38,7 +48,7 @@ public class JsonWriterProcessor extends AbstractProcessor {
           generate(o);
         }
       } catch (Exception e) {
-        throw new RuntimeException(e);
+        throw new GenerationException(e);
       }
     }
 
@@ -104,7 +114,7 @@ public class JsonWriterProcessor extends AbstractProcessor {
     }
   }
 
-  private static void toJsonNode(
+  private void toJsonNode(
       List<Property> jsonNodeForNameMap, String simpleClassName, PrintWriter out) {
     out.println("\tstatic JsonNode toJsonNode(ObjectNode root, " + simpleClassName + " in) {");
 
@@ -125,7 +135,7 @@ public class JsonWriterProcessor extends AbstractProcessor {
     out.println("\t}");
   }
 
-  private static void toJson(String simpleClassName, PrintWriter out) {
+  private void toJson(String simpleClassName, PrintWriter out) {
     out.println("\tpublic static byte[] toJson(" + simpleClassName + " in) {");
     out.println("\t\tObjectMapper objectMapper = new ObjectMapper();");
     out.println();
@@ -138,12 +148,15 @@ public class JsonWriterProcessor extends AbstractProcessor {
     out.println("\t}");
   }
 
-  private static List<Property> getJsonNodeForNameMap(Element e) {
+  private List<Property> getJsonNodeForNameMap(Element e) {
     List<Property> vars = new ArrayList<>();
 
-    for (Element enclosedElement : e.getEnclosedElements()) {
+    List<? extends Element> recordComponents =
+        e.getEnclosedElements().stream()
+            .filter(f -> f.getKind() == ElementKind.RECORD_COMPONENT)
+            .toList();
 
-      if (enclosedElement.getKind() != ElementKind.RECORD_COMPONENT) continue;
+    for (Element enclosedElement : recordComponents) {
 
       RecordComponentElement re = (RecordComponentElement) enclosedElement;
       // name of the variable
@@ -162,12 +175,12 @@ public class JsonWriterProcessor extends AbstractProcessor {
           vars.add(new Property(varName.toString(), false, null));
         }
 
-        if (typeString.startsWith("org.example.")) {
+        String participatingPackage = processingEnv.getOptions().get(PACKAGE);
+
+        if (participatingPackage != null && typeString.startsWith("org.example.")) {
           String name = typeString.substring(typeString.lastIndexOf('.') + 1);
           vars.add(new Property(varName.toString(), true, name));
         }
-
-        continue;
 
         // todo
         //  we can put lists
@@ -176,13 +189,11 @@ public class JsonWriterProcessor extends AbstractProcessor {
         //    vars.put(varName, type);
         //    continue;
         //  }
+      } else if (kind.isPrimitive()) {
+        vars.add(new Property(varName.toString(), false, null));
+      } else {
+        LOGGER.info("unsupported kind: " + kind);
       }
-
-      if (!kind.isPrimitive()) {
-        continue;
-      }
-
-      vars.add(new Property(varName.toString(), false, null));
     }
 
     return vars;
