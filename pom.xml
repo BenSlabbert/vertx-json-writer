@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>org.example</groupId>
+  <artifactId>json-writer</artifactId>
+  <version>${revision}</version>
+  <packaging>pom</packaging>
+
+  <modules>
+    <module>dto</module>
+    <module>processor</module>
+  </modules>
+
+  <properties>
+    <java.version>17</java.version>
+    <maven.compiler.source>${java.version}</maven.compiler.source>
+    <maven.compiler.target>${java.version}</maven.compiler.target>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <revision>1.0-SNAPSHOT</revision>
+
+    <maven-surefire-plugin.version>3.0.0-M9</maven-surefire-plugin.version>
+    <spotless.version>2.31.0</spotless.version>
+    <maven-compiler-plugin.version>3.10.1</maven-compiler-plugin.version>
+    <auto-service.version>1.0.1</auto-service.version>
+    <google-format.version>1.15.0</google-format.version>
+    <compile-testing.version>0.21.0</compile-testing.version>
+  </properties>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.junit</groupId>
+        <artifactId>junit-bom</artifactId>
+        <version>5.9.2</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>com.google.auto.service</groupId>
+        <artifactId>auto-service</artifactId>
+        <version>${auto-service.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-databind</artifactId>
+        <version>2.14.2</version>
+      </dependency>
+      <dependency>
+        <groupId>com.google.testing.compile</groupId>
+        <artifactId>compile-testing</artifactId>
+        <version>0.21.0</version>
+        <scope>test</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
+  <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <version>${maven-compiler-plugin.version}</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <version>${maven-surefire-plugin.version}</version>
+        </plugin>
+        <plugin>
+          <groupId>com.diffplug.spotless</groupId>
+          <artifactId>spotless-maven-plugin</artifactId>
+          <version>${spotless.version}</version>
+          <configuration>
+            <pom>
+              <includes>
+                <include>pom.xml</include>
+              </includes>
+              <sortPom>
+                <encoding>UTF-8</encoding>
+                <lineSeparator>${line.separator}</lineSeparator>
+                <expandEmptyElements>false</expandEmptyElements>
+                <spaceBeforeCloseEmptyElement>true</spaceBeforeCloseEmptyElement>
+                <keepBlankLines>true</keepBlankLines>
+                <nrOfIndentSpace>2</nrOfIndentSpace>
+                <predefinedSortOrder>recommended_2008_06</predefinedSortOrder>
+                <sortDependencies>scope,group,artifactId</sortDependencies>
+              </sortPom>
+            </pom>
+            <java>
+              <googleJavaFormat>
+                <version>${google-format.version}</version>
+                <style>GOOGLE</style>
+                <reflowLongStrings>true</reflowLongStrings>
+              </googleJavaFormat>
+            </java>
+          </configuration>
+        </plugin>
+
+      </plugins>
+    </pluginManagement>
+  </build>
+
+</project>
