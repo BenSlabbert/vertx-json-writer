@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.logging.Logger;
 import javax.annotation.processing.AbstractProcessor;
@@ -100,6 +101,9 @@ public class JsonWriterProcessor extends AbstractProcessor {
       out.println("import com.fasterxml.jackson.databind.node.ObjectNode;");
       out.println("import com.fasterxml.jackson.databind.JsonNode;");
       out.println("import com.fasterxml.jackson.core.JsonProcessingException;");
+      out.println("import java.util.Map;");
+      out.println("import java.util.Base64;");
+      out.println("import java.nio.charset.StandardCharsets;");
       out.println();
 
       out.print("public class ");
@@ -107,11 +111,70 @@ public class JsonWriterProcessor extends AbstractProcessor {
       out.println(" {");
       out.println();
 
+      toMap(jsonNodeForNameMap, simpleClassName, out);
+      out.println();
+
       toJson(simpleClassName, out);
+      out.println();
+
       toJsonNode(jsonNodeForNameMap, simpleClassName, out);
+      out.println();
 
       out.println("}");
     }
+  }
+
+  private void toMap(List<Property> jsonNodeForNameMap, String simpleClassName, PrintWriter out) {
+    List<Property> simpleProperties =
+        jsonNodeForNameMap.stream().filter(p -> !p.isComplex()).toList();
+
+    simpleProperties.stream()
+        .map(
+            property ->
+                "\tpublic static String "
+                    + property.name().toUpperCase(Locale.ROOT)
+                    + " = \""
+                    + property.name()
+                    + "\";")
+        .forEach(out::println);
+
+    out.println();
+
+    out.println("\tpublic static Map<String, String> toMap(" + simpleClassName + " in) {");
+    out.println("\t\treturn Map.of(");
+
+    for (int i = 0; i < simpleProperties.size(); i++) {
+      Property simpleProperty = simpleProperties.get(i);
+      out.print(
+          "\t\t\t\t\t\t"
+              + simpleProperty.name().toUpperCase(Locale.ROOT)
+              + ", "
+              + primitiveToString(simpleProperty)
+              + "");
+
+      // add trailing comma if needed
+      if (i != simpleProperties.size() - 1) {
+        out.println(",");
+      } else {
+        out.println();
+      }
+    }
+    out.println("\t\t);");
+    out.println("\t}");
+  }
+
+  private String primitiveToString(Property property) {
+    return switch (property.kind()) {
+      case BOOLEAN -> "Boolean.toString(in." + property.name() + "())";
+      case BYTE -> "Base64.getEncoder().encodeToString(new byte[]{in." + property.name() + "()})";
+      case SHORT -> "Short.toString(in." + property.name() + "())";
+      case INT -> "Integer.toString(in." + property.name() + "())";
+      case LONG -> "Long.toString(in." + property.name() + "())";
+      case CHAR -> "String.valueOf(in." + property.name() + "())";
+      case FLOAT -> "Float.toString(in." + property.name() + "())";
+      case DOUBLE -> "Double.toString(in." + property.name() + "())";
+      default -> "in." + property.name() + "()";
+    };
   }
 
   private void toJsonNode(
@@ -120,13 +183,30 @@ public class JsonWriterProcessor extends AbstractProcessor {
 
     for (Property property : jsonNodeForNameMap) {
       if (Boolean.FALSE.equals(property.isComplex())) {
-        out.println("\t\troot.put(\"" + property.name() + "\", in." + property.name() + "());");
+        if (property.kind == TypeKind.CHAR) {
+          out.println(
+              "\t\troot.put(\""
+                  + property.name()
+                  + "\", String.valueOf(in."
+                  + property.name()
+                  + "()));");
+        } else if (property.kind == TypeKind.BYTE) {
+          // base64 encode
+          out.println(
+              "\t\troot.put(\""
+                  + property.name()
+                  + "\", Base64.getEncoder().encodeToString(new byte[]{in."
+                  + property.name()
+                  + "()}));");
+        } else {
+          out.println("\t\troot.put(\"" + property.name() + "\", in." + property.name() + "());");
+        }
       } else {
         out.println(
             "\t\troot.set(\""
                 + property.name()
                 + "\", "
-                + property.qualifiedName()
+                + property.className()
                 + "JsonWriter.toJsonNode(root.objectNode(), in.job()));");
       }
     }
@@ -172,14 +252,14 @@ public class JsonWriterProcessor extends AbstractProcessor {
 
         // we can put strings
         if (typeString.equals("java.lang.String")) {
-          vars.add(new Property(varName.toString(), false, null));
+          vars.add(new Property(varName.toString(), false, null, kind));
         }
 
         String participatingPackage = processingEnv.getOptions().get(PACKAGE);
 
-        if (participatingPackage != null && typeString.startsWith("org.example.")) {
+        if (participatingPackage != null && typeString.startsWith(participatingPackage)) {
           String name = typeString.substring(typeString.lastIndexOf('.') + 1);
-          vars.add(new Property(varName.toString(), true, name));
+          vars.add(new Property(varName.toString(), true, name, kind));
         }
 
         // todo
@@ -190,14 +270,15 @@ public class JsonWriterProcessor extends AbstractProcessor {
         //    continue;
         //  }
       } else if (kind.isPrimitive()) {
-        vars.add(new Property(varName.toString(), false, null));
+        vars.add(new Property(varName.toString(), false, null, kind));
       } else {
-        LOGGER.info("unsupported kind: " + kind);
+        String msg = String.format("unsupported kind: %s", kind);
+        LOGGER.info(msg);
       }
     }
 
     return vars;
   }
 
-  private record Property(String name, boolean isComplex, String qualifiedName) {}
+  private record Property(String name, boolean isComplex, String className, TypeKind kind) {}
 }
