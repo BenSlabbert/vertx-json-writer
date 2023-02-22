@@ -19,20 +19,27 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <revision>1.0-SNAPSHOT</revision>
 
-    <maven-surefire-plugin.version>3.0.0-M9</maven-surefire-plugin.version>
+    <!--deps-->
+    <sring-boot.version>3.0.2</sring-boot.version>
     <spotless.version>2.31.0</spotless.version>
-    <maven-compiler-plugin.version>3.10.1</maven-compiler-plugin.version>
     <auto-service.version>1.0.1</auto-service.version>
     <google-format.version>1.15.0</google-format.version>
     <compile-testing.version>0.21.0</compile-testing.version>
+
+    <!--plugins-->
+    <maven-surefire-plugin.version>3.0.0-M9</maven-surefire-plugin.version>
+    <maven-compiler-plugin.version>3.10.1</maven-compiler-plugin.version>
+    <maven-install-plugin.version>2.5.2</maven-install-plugin.version>
+    <maven-jar-plugin.version>3.2.0</maven-jar-plugin.version>
+    <flatten-maven-plugin.version>1.3.0</flatten-maven-plugin.version>
   </properties>
 
   <dependencyManagement>
     <dependencies>
       <dependency>
-        <groupId>org.junit</groupId>
-        <artifactId>junit-bom</artifactId>
-        <version>5.9.2</version>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-dependencies</artifactId>
+        <version>${sring-boot.version}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -42,14 +49,9 @@
         <version>${auto-service.version}</version>
       </dependency>
       <dependency>
-        <groupId>com.fasterxml.jackson.core</groupId>
-        <artifactId>jackson-databind</artifactId>
-        <version>2.14.2</version>
-      </dependency>
-      <dependency>
         <groupId>com.google.testing.compile</groupId>
         <artifactId>compile-testing</artifactId>
-        <version>0.21.0</version>
+        <version>${compile-testing.version}</version>
         <scope>test</scope>
       </dependency>
     </dependencies>
@@ -59,9 +61,49 @@
     <pluginManagement>
       <plugins>
         <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>flatten-maven-plugin</artifactId>
+          <version>${flatten-maven-plugin.version}</version>
+          <configuration>
+            <updatePomFile>true</updatePomFile>
+            <flattenMode>resolveCiFriendliesOnly</flattenMode>
+          </configuration>
+          <executions>
+            <execution>
+              <id>flatten</id>
+              <goals>
+                <goal>flatten</goal>
+              </goals>
+              <phase>process-resources</phase>
+            </execution>
+            <execution>
+              <id>flatten.clean</id>
+              <goals>
+                <goal>clean</goal>
+              </goals>
+              <phase>clean</phase>
+            </execution>
+          </executions>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-install-plugin</artifactId>
+          <version>${maven-install-plugin.version}</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-jar-plugin</artifactId>
+          <version>${maven-jar-plugin.version}</version>
+        </plugin>
+        <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-compiler-plugin</artifactId>
           <version>${maven-compiler-plugin.version}</version>
+          <configuration>
+            <source>${java.version}</source>
+            <target>${java.version}</target>
+            <encoding>${project.build.sourceEncoding}</encoding>
+          </configuration>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
@@ -97,7 +139,6 @@
             </java>
           </configuration>
         </plugin>
-
       </plugins>
     </pluginManagement>
   </build>

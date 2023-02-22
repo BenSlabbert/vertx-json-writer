@@ -10,7 +10,6 @@
 
   <groupId>org.example.processor</groupId>
   <artifactId>processor</artifactId>
-  <version>${revision}</version>
   <packaging>jar</packaging>
 
   <dependencies>
@@ -49,6 +48,19 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
       </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-install-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>flatten-maven-plugin</artifactId>
+      </plugin>
+
     </plugins>
   </build>
 

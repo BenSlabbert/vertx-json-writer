@@ -10,8 +10,6 @@
 
   <groupId>org.example.dto</groupId>
   <artifactId>dto</artifactId>
-  <version>${revision}</version>
-  <packaging>jar</packaging>
 
   <dependencies>
     <dependency>
@@ -42,6 +40,14 @@
             <arg>-Apackage=org.example.dto</arg>
           </compilerArgs>
         </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-install-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
       </plugin>
     </plugins>
   </build>

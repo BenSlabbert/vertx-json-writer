@@ -11,10 +11,10 @@ import org.example.dto.PrimitiveEntityJsonWriter;
 public class App {
 
   public static void main(String[] args) {
-    byte[] names = JobJsonWriter.toJson(new Job("job1"));
+    byte[] names = JobJsonWriter.toJsonBytes(new Job("job1"));
     System.err.println(new String(names));
 
-    byte[] bytes = PersonJsonWriter.toJson(new Person("person1", 1, true, new Job("job2")));
+    byte[] bytes = PersonJsonWriter.toJsonBytes(new Person("person1", 1, true, new Job("job2")));
     System.err.println(new String(bytes));
 
     PrimitiveEntity c =
@@ -22,6 +22,6 @@ public class App {
 
     Map<String, String> stringStringMap1 = PrimitiveEntityJsonWriter.toMap(c);
     System.err.println(stringStringMap1);
-    System.err.println(new String(PrimitiveEntityJsonWriter.toJson(c)));
+    System.err.println(PrimitiveEntityJsonWriter.toJsonString(c));
   }
 }

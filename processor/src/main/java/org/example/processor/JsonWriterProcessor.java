@@ -30,6 +30,13 @@ import javax.tools.JavaFileObject;
 @AutoService(Processor.class)
 public class JsonWriterProcessor extends AbstractProcessor {
 
+  // todo try using this rather for generating code: https://github.com/square/javapoet
+
+  // todo look into
+  //  https://checkerframework.org/api/org/checkerframework/javacutil/package-summary.html
+  //  and dep https://mvnrepository.com/artifact/org.checkerframework/javacutil/3.31.0
+  //  can help get better type management for generated code
+
   private static final Logger LOGGER = Logger.getLogger(JsonWriterProcessor.class.getName());
 
   private static final String PACKAGE = "package";
@@ -119,11 +126,13 @@ public class JsonWriterProcessor extends AbstractProcessor {
         out.println();
       }
 
-      toJson(simpleClassName, out);
+      toJsonBytes(simpleClassName, out);
+      out.println();
+
+      toJsonString(simpleClassName, out);
       out.println();
 
       toJsonNode(properties, simpleClassName, out);
-      out.println();
 
       out.println("}");
     }
@@ -158,7 +167,7 @@ public class JsonWriterProcessor extends AbstractProcessor {
     simpleProperties.stream()
         .map(
             property ->
-                "\tpublic static String "
+                "\tpublic static final String "
                     + property.name().toUpperCase(Locale.ROOT)
                     + " = \""
                     + property.name()
@@ -283,7 +292,9 @@ public class JsonWriterProcessor extends AbstractProcessor {
                 + property.name()
                 + "\", "
                 + property.className()
-                + "JsonWriter.toJsonNode(root.objectNode(), in.job()));");
+                + "JsonWriter.toJsonNode(root.objectNode(), in."
+                + property.name()
+                + "()));");
       }
     }
 
@@ -291,13 +302,26 @@ public class JsonWriterProcessor extends AbstractProcessor {
     out.println("\t}");
   }
 
-  private void toJson(String simpleClassName, PrintWriter out) {
-    out.println("\tpublic static byte[] toJson(" + simpleClassName + " in) {");
+  private void toJsonBytes(String simpleClassName, PrintWriter out) {
+    out.println("\tpublic static byte[] toJsonBytes(" + simpleClassName + " in) {");
     out.println("\t\tObjectMapper objectMapper = new ObjectMapper();");
     out.println();
     out.println("\t\ttry {");
     out.println("\t\t\tJsonNode node = toJsonNode(objectMapper.createObjectNode(),in);");
     out.println("\t\t\treturn objectMapper.writeValueAsBytes(node);");
+    out.println("\t\t} catch (JsonProcessingException e) {");
+    out.println("\t\t\tthrow new RuntimeException(e);");
+    out.println("\t\t}");
+    out.println("\t}");
+  }
+
+  private void toJsonString(String simpleClassName, PrintWriter out) {
+    out.println("\tpublic static String toJsonString(" + simpleClassName + " in) {");
+    out.println("\t\tObjectMapper objectMapper = new ObjectMapper();");
+    out.println();
+    out.println("\t\ttry {");
+    out.println("\t\t\tJsonNode node = toJsonNode(objectMapper.createObjectNode(),in);");
+    out.println("\t\t\treturn objectMapper.writeValueAsString(node);");
     out.println("\t\t} catch (JsonProcessingException e) {");
     out.println("\t\t\tthrow new RuntimeException(e);");
     out.println("\t\t}");
@@ -331,6 +355,7 @@ public class JsonWriterProcessor extends AbstractProcessor {
           properties.add(new Property(varName.toString(), false, null, kind));
         }
 
+        // todo support a list of these packages
         String participatingPackage = processingEnv.getOptions().get(PACKAGE);
 
         if (participatingPackage != null && typeString.startsWith(participatingPackage)) {
