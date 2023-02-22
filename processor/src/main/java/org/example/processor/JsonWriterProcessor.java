@@ -26,7 +26,7 @@ import javax.lang.model.type.TypeMirror;
 import javax.tools.JavaFileObject;
 
 @SupportedAnnotationTypes("org.example.processor.annotation.JsonWriter")
-@SupportedSourceVersion(SourceVersion.RELEASE_17)
+@SupportedSourceVersion(SourceVersion.RELEASE_19)
 @AutoService(Processor.class)
 public class JsonWriterProcessor extends AbstractProcessor {
 
