@@ -2,11 +2,10 @@
 
 M := "mvn"
 
-
 .PHONY: build
 build: clean fmt
-	${M} spotbugs:spotbugs
 	${M} install
+	${M} spotbugs:spotbugs
 
 .PHONY: fmt
 fmt:
