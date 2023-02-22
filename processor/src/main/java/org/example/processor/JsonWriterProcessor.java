@@ -118,6 +118,17 @@ public class JsonWriterProcessor extends AbstractProcessor {
       out.println(" {");
       out.println();
 
+      properties.stream()
+          .map(
+              property ->
+                  "\tpublic static final String "
+                      + property.name().toUpperCase(Locale.ROOT)
+                      + " = \""
+                      + property.name()
+                      + "\";")
+          .forEach(out::println);
+      out.println();
+
       if (hasOnlyPrimitiveAttributes(properties)) {
         toMap(properties, simpleClassName, out);
         out.println();
@@ -164,25 +175,13 @@ public class JsonWriterProcessor extends AbstractProcessor {
   private void toMap(List<Property> properties, String simpleClassName, PrintWriter out) {
     List<Property> simpleProperties = properties.stream().filter(p -> !p.isComplex()).toList();
 
-    simpleProperties.stream()
-        .map(
-            property ->
-                "\tpublic static final String "
-                    + property.name().toUpperCase(Locale.ROOT)
-                    + " = \""
-                    + property.name()
-                    + "\";")
-        .forEach(out::println);
-
-    out.println();
-
     out.println("\tpublic static Map<String, String> toMap(" + simpleClassName + " in) {");
     out.println("\t\treturn Map.of(");
 
     for (int i = 0; i < simpleProperties.size(); i++) {
       Property simpleProperty = simpleProperties.get(i);
       out.print(
-          "\t\t\t\t\t\t"
+          "\t\t\t"
               + simpleProperty.name().toUpperCase(Locale.ROOT)
               + ", "
               + primitiveToString(simpleProperty)
@@ -270,27 +269,32 @@ public class JsonWriterProcessor extends AbstractProcessor {
       if (Boolean.FALSE.equals(property.isComplex())) {
         if (property.kind == TypeKind.CHAR) {
           out.println(
-              "\t\troot.put(\""
-                  + property.name()
-                  + "\", String.valueOf(in."
+              "\t\troot.put("
+                  + property.name().toUpperCase(Locale.ROOT)
+                  + ", String.valueOf(in."
                   + property.name()
                   + "()));");
         } else if (property.kind == TypeKind.BYTE) {
           // base64 encode
           out.println(
-              "\t\troot.put(\""
-                  + property.name()
-                  + "\", Base64.getEncoder().encodeToString(new byte[]{in."
+              "\t\troot.put("
+                  + property.name().toUpperCase(Locale.ROOT)
+                  + ", Base64.getEncoder().encodeToString(new byte[]{in."
                   + property.name()
                   + "()}));");
         } else {
-          out.println("\t\troot.put(\"" + property.name() + "\", in." + property.name() + "());");
+          out.println(
+              "\t\troot.put("
+                  + property.name().toUpperCase(Locale.ROOT)
+                  + ", in."
+                  + property.name()
+                  + "());");
         }
       } else {
         out.println(
-            "\t\troot.set(\""
-                + property.name()
-                + "\", "
+            "\t\troot.set("
+                + property.name().toUpperCase(Locale.ROOT)
+                + ", "
                 + property.className()
                 + "JsonWriter.toJsonNode(root.objectNode(), in."
                 + property.name()

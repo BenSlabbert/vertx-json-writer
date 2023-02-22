@@ -7,6 +7,8 @@ For example usage see [test](./dto/src/main/java/org/example/App.java)
 A record like:
 
 ```java
+package org.example.dto;
+
 import org.example.processor.annotation.JsonWriter;
 
 @JsonWriter
@@ -16,6 +18,8 @@ public record Job(String name) {}
 Will have a class like this generated:
 
 ```java
+package org.example.dto;
+
 import org.example.dto.Job;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -31,7 +35,7 @@ public class JobJsonWriter {
 
 	public static Map<String, String> toMap(Job in) {
 		return Map.of(
-						NAME, in.name()
+			NAME, in.name()
 		);
 	}
 
@@ -63,7 +67,7 @@ public class JobJsonWriter {
 	}
 
 	static JsonNode toJsonNode(ObjectNode root, Job in) {
-		root.put("name", in.name());
+		root.put(NAME, in.name());
 		return root;
 	}
 }
