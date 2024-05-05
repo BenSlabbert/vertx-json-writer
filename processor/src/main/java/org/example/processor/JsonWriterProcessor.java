@@ -26,11 +26,9 @@ import javax.lang.model.type.TypeMirror;
 import javax.tools.JavaFileObject;
 
 @SupportedAnnotationTypes("org.example.processor.annotation.JsonWriter")
-@SupportedSourceVersion(SourceVersion.RELEASE_19)
+@SupportedSourceVersion(SourceVersion.RELEASE_21)
 @AutoService(Processor.class)
 public class JsonWriterProcessor extends AbstractProcessor {
-
-  // todo try using this rather for generating code: https://github.com/square/javapoet
 
   // todo look into
   //  https://checkerframework.org/api/org/checkerframework/javacutil/package-summary.html
@@ -200,51 +198,60 @@ public class JsonWriterProcessor extends AbstractProcessor {
 
   private String primitiveFromString(Property property) {
     return switch (property.kind()) {
-      case BOOLEAN -> "boolean "
-          + property.name()
-          + " = Boolean.getBoolean(in.get("
-          + property.name().toUpperCase(Locale.ROOT)
-          + "));";
-      case BYTE -> "byte "
-          + property.name()
-          + " = Base64.getDecoder().decode(in.get("
-          + property.name().toUpperCase(Locale.ROOT)
-          + "))[0];";
-      case SHORT -> "short "
-          + property.name()
-          + " = Short.parseShort(in.get("
-          + property.name().toUpperCase(Locale.ROOT)
-          + "));";
-      case INT -> "int "
-          + property.name()
-          + " = Integer.parseInt(in.get("
-          + property.name().toUpperCase(Locale.ROOT)
-          + "));";
-      case LONG -> "long "
-          + property.name()
-          + " = Long.parseLong(in.get("
-          + property.name().toUpperCase(Locale.ROOT)
-          + "));";
-      case CHAR -> "char "
-          + property.name()
-          + " = in.get("
-          + property.name().toUpperCase(Locale.ROOT)
-          + ").charAt(0);";
-      case FLOAT -> "float "
-          + property.name()
-          + " = Float.parseFloat(in.get("
-          + property.name().toUpperCase(Locale.ROOT)
-          + "));";
-      case DOUBLE -> "double "
-          + property.name()
-          + " = Double.parseDouble(in.get("
-          + property.name().toUpperCase(Locale.ROOT)
-          + "));";
-      default -> "String "
-          + property.name()
-          + " = in.get("
-          + property.name().toUpperCase(Locale.ROOT)
-          + ");";
+      case BOOLEAN ->
+          "boolean "
+              + property.name()
+              + " = Boolean.getBoolean(in.get("
+              + property.name().toUpperCase(Locale.ROOT)
+              + "));";
+      case BYTE ->
+          "byte "
+              + property.name()
+              + " = Base64.getDecoder().decode(in.get("
+              + property.name().toUpperCase(Locale.ROOT)
+              + "))[0];";
+      case SHORT ->
+          "short "
+              + property.name()
+              + " = Short.parseShort(in.get("
+              + property.name().toUpperCase(Locale.ROOT)
+              + "));";
+      case INT ->
+          "int "
+              + property.name()
+              + " = Integer.parseInt(in.get("
+              + property.name().toUpperCase(Locale.ROOT)
+              + "));";
+      case LONG ->
+          "long "
+              + property.name()
+              + " = Long.parseLong(in.get("
+              + property.name().toUpperCase(Locale.ROOT)
+              + "));";
+      case CHAR ->
+          "char "
+              + property.name()
+              + " = in.get("
+              + property.name().toUpperCase(Locale.ROOT)
+              + ").charAt(0);";
+      case FLOAT ->
+          "float "
+              + property.name()
+              + " = Float.parseFloat(in.get("
+              + property.name().toUpperCase(Locale.ROOT)
+              + "));";
+      case DOUBLE ->
+          "double "
+              + property.name()
+              + " = Double.parseDouble(in.get("
+              + property.name().toUpperCase(Locale.ROOT)
+              + "));";
+      default ->
+          "String "
+              + property.name()
+              + " = in.get("
+              + property.name().toUpperCase(Locale.ROOT)
+              + ");";
     };
   }
 
