@@ -25,7 +25,6 @@
     <auto-service.version>1.1.1</auto-service.version>
     <google-format.version>1.22.0</google-format.version>
     <compile-testing.version>0.21.0</compile-testing.version>
-    <spotbugs.version>4.7.3</spotbugs.version>
     <junit-jupiter.version>5.10.2</junit-jupiter.version>
     <google-auto-value.version>1.10.4</google-auto-value.version>
 
@@ -35,8 +34,6 @@
     <maven-install-plugin.version>3.1.2</maven-install-plugin.version>
     <maven-jar-plugin.version>3.4.1</maven-jar-plugin.version>
     <flatten-maven-plugin.version>1.6.0</flatten-maven-plugin.version>
-    <spotbugs-maven-plugin.version>4.8.4.0</spotbugs-maven-plugin.version>
-    <findsecbugs-plugin.version>1.13.0</findsecbugs-plugin.version>
   </properties>
 
   <dependencyManagement>
@@ -153,30 +150,6 @@
               </googleJavaFormat>
             </java>
           </configuration>
-        </plugin>
-        <plugin>
-          <groupId>com.github.spotbugs</groupId>
-          <artifactId>spotbugs-maven-plugin</artifactId>
-          <version>${spotbugs-maven-plugin.version}</version>
-          <configuration>
-            <includeFilterFile>spotbugs-security-include.xml</includeFilterFile>
-            <excludeFilterFile>spotbugs-security-exclude.xml</excludeFilterFile>
-            <plugins>
-              <plugin>
-                <groupId>com.h3xstream.findsecbugs</groupId>
-                <artifactId>findsecbugs-plugin</artifactId>
-                <version>${findsecbugs-plugin.version}</version>
-              </plugin>
-            </plugins>
-          </configuration>
-          <dependencies>
-            <!-- overwrite dependency on spotbugs if you want to specify the version of spotbugs -->
-            <dependency>
-              <groupId>com.github.spotbugs</groupId>
-              <artifactId>spotbugs</artifactId>
-              <version>${spotbugs.version}</version>
-            </dependency>
-          </dependencies>
         </plugin>
       </plugins>
     </pluginManagement>

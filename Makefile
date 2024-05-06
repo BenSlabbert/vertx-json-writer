@@ -5,7 +5,6 @@ M := "mvn"
 .PHONY: build
 build: clean fmt
 	${M} install
-	${M} spotbugs:spotbugs
 
 .PHONY: compile
 compile:

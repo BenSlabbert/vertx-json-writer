@@ -8,8 +8,8 @@
     <version>${revision}</version>
   </parent>
 
-  <groupId>org.example.dto</groupId>
-  <artifactId>dto</artifactId>
+  <groupId>org.example.example</groupId>
+  <artifactId>example</artifactId>
 
   <dependencies>
     <dependency>
