@@ -8,7 +8,7 @@
   <packaging>pom</packaging>
 
   <modules>
-    <module>dto</module>
+    <module>example</module>
     <module>processor</module>
   </modules>
 
