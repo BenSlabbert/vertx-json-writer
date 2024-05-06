@@ -20,19 +20,21 @@
     <revision>1.0-SNAPSHOT</revision>
 
     <!--deps-->
-    <sring-boot.version>3.2.5</sring-boot.version>
+    <vertx.version>4.5.7</vertx.version>
     <spotless.version>2.43.0</spotless.version>
     <auto-service.version>1.1.1</auto-service.version>
     <google-format.version>1.22.0</google-format.version>
     <compile-testing.version>0.21.0</compile-testing.version>
     <spotbugs.version>4.7.3</spotbugs.version>
+    <junit-jupiter.version>5.10.2</junit-jupiter.version>
+    <google-auto-value.version>1.10.4</google-auto-value.version>
 
     <!--plugins-->
-    <maven-surefire-plugin.version>3.0.0-M9</maven-surefire-plugin.version>
-    <maven-compiler-plugin.version>3.10.1</maven-compiler-plugin.version>
-    <maven-install-plugin.version>2.5.2</maven-install-plugin.version>
-    <maven-jar-plugin.version>3.2.0</maven-jar-plugin.version>
-    <flatten-maven-plugin.version>1.3.0</flatten-maven-plugin.version>
+    <maven-surefire-plugin.version>3.2.5</maven-surefire-plugin.version>
+    <maven-compiler-plugin.version>3.13.0</maven-compiler-plugin.version>
+    <maven-install-plugin.version>3.1.2</maven-install-plugin.version>
+    <maven-jar-plugin.version>3.4.1</maven-jar-plugin.version>
+    <flatten-maven-plugin.version>1.6.0</flatten-maven-plugin.version>
     <spotbugs-maven-plugin.version>4.8.4.0</spotbugs-maven-plugin.version>
     <findsecbugs-plugin.version>1.13.0</findsecbugs-plugin.version>
   </properties>
@@ -40,9 +42,9 @@
   <dependencyManagement>
     <dependencies>
       <dependency>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-dependencies</artifactId>
-        <version>${sring-boot.version}</version>
+        <groupId>io.vertx</groupId>
+        <artifactId>vertx-stack-depchain</artifactId>
+        <version>${vertx.version}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -52,9 +54,39 @@
         <version>${auto-service.version}</version>
       </dependency>
       <dependency>
+        <groupId>com.google.auto.value</groupId>
+        <artifactId>auto-value-annotations</artifactId>
+        <version>${google-auto-value.version}</version>
+        <scope>provided</scope>
+      </dependency>
+      <dependency>
         <groupId>com.google.testing.compile</groupId>
         <artifactId>compile-testing</artifactId>
         <version>${compile-testing.version}</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.junit.jupiter</groupId>
+        <artifactId>junit-jupiter</artifactId>
+        <version>${junit-jupiter.version}</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.testcontainers</groupId>
+        <artifactId>junit-jupiter</artifactId>
+        <version>${testcontainers.version}</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.junit.jupiter</groupId>
+        <artifactId>junit-jupiter-api</artifactId>
+        <version>${junit-jupiter.version}</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.junit.jupiter</groupId>
+        <artifactId>junit-jupiter-engine</artifactId>
+        <version>${junit-jupiter.version}</version>
         <scope>test</scope>
       </dependency>
     </dependencies>
@@ -146,7 +178,6 @@
             </dependency>
           </dependencies>
         </plugin>
-
       </plugins>
     </pluginManagement>
   </build>
