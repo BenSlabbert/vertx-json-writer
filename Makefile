@@ -18,6 +18,10 @@ package:
 fmt:
 	${M} spotless:apply
 
+.PHONY: fmtCheck
+fmtCheck:
+	${M} spotless:check
+
 .PHONY: clean
 clean:
 	${M} clean
