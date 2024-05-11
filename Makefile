@@ -6,6 +6,10 @@ M := "mvn"
 build: clean fmt
 	${M} install
 
+.PHONY: deploy
+deploy: fmt
+	${M} deploy
+
 .PHONY: compile
 compile:
 	${M} compile
