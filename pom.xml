@@ -7,13 +7,13 @@
   <version>${revision}</version>
   <packaging>pom</packaging>
 
+  <name>Vert.x JSON Writer</name>
+  <description>Provides a Java annotation processor to generate toJson and fromJson methods for Java records</description>
+
   <modules>
     <module>example</module>
     <module>processor</module>
   </modules>
-
-  <name>Vert.x JSON Writer</name>
-  <description>Provides a Java annotation processor to generate toJson and fromJson methods for Java records</description>
 
   <distributionManagement>
     <repository>
