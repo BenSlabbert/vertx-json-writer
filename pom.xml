@@ -12,6 +12,17 @@
     <module>processor</module>
   </modules>
 
+  <name>Vert.x JSON Writer</name>
+  <description>Provides a Java annotation processor to generate toJson and fromJson methods for Java records</description>
+
+  <distributionManagement>
+    <repository>
+      <id>github</id>
+      <name>GitHub BenSlabbert Apache Maven Packages</name>
+      <url>https://maven.pkg.github.com/BenSlabbert/vertx-json-writer</url>
+    </repository>
+  </distributionManagement>
+
   <properties>
     <java.version>21</java.version>
     <maven.compiler.source>${java.version}</maven.compiler.source>
