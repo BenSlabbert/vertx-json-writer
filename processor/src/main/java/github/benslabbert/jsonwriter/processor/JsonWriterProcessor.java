@@ -1,5 +1,5 @@
 /* Licensed under Apache-2.0 2024. */
-package org.example.processor;
+package github.benslabbert.jsonwriter.processor;
 
 import com.google.auto.service.AutoService;
 import io.vertx.core.json.JsonObject;
@@ -26,7 +26,7 @@ import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.tools.JavaFileObject;
 
-@SupportedAnnotationTypes("org.example.processor.annotation.JsonWriter")
+@SupportedAnnotationTypes("github.benslabbert.jsonwriter.processor.annotation.JsonWriter")
 @SupportedSourceVersion(SourceVersion.RELEASE_21)
 @AutoService(Processor.class)
 public class JsonWriterProcessor extends AbstractProcessor {

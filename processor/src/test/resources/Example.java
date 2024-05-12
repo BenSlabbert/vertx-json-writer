@@ -1,7 +1,7 @@
 /* Licensed under Apache-2.0 2024. */
 package my.test;
 
-import org.example.processor.annotation.JsonWriter;
+import github.benslabbert.jsonwriter.processor.annotation.JsonWriter;
 
 @JsonWriter
 public record Example(String name) {

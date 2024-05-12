@@ -1,9 +1,9 @@
 /* Licensed under Apache-2.0 2024. */
-package org.example.dto;
+package github.benslabbert.jsonwriter.example.dto;
 
 import com.google.auto.value.AutoBuilder;
+import github.benslabbert.jsonwriter.processor.annotation.JsonWriter;
 import io.vertx.core.json.JsonObject;
-import org.example.processor.annotation.JsonWriter;
 
 @JsonWriter
 public record Person(String name, int age, boolean bool, Job job) {

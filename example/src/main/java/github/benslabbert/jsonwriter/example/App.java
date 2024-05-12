@@ -1,9 +1,9 @@
 /* Licensed under Apache-2.0 2024. */
-package org.example;
+package github.benslabbert.jsonwriter.example;
 
+import github.benslabbert.jsonwriter.example.dto.Job;
+import github.benslabbert.jsonwriter.example.dto.Person;
 import io.vertx.core.json.JsonObject;
-import org.example.dto.Job;
-import org.example.dto.Person;
 
 public class App {
 
