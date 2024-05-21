@@ -2,7 +2,7 @@
 package github.benslabbert.jsonwriter.example.dto;
 
 import com.google.auto.value.AutoBuilder;
-import github.benslabbert.jsonwriter.processor.annotation.JsonWriter;
+import github.benslabbert.jsonwriter.annotation.JsonWriter;
 import io.vertx.core.json.JsonObject;
 
 @JsonWriter
