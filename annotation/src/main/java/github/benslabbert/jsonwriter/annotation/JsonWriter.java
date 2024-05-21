@@ -1,5 +1,5 @@
 /* Licensed under Apache-2.0 2024. */
-package github.benslabbert.jsonwriter.processor.annotation;
+package github.benslabbert.jsonwriter.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

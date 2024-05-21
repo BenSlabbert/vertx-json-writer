@@ -12,6 +12,11 @@
 
   <dependencies>
     <dependency>
+      <groupId>github.benslabbert.jsonwriter</groupId>
+      <artifactId>annotation</artifactId>
+      <version>${revision}</version>
+    </dependency>
+    <dependency>
       <groupId>com.google.auto.service</groupId>
       <artifactId>auto-service</artifactId>
     </dependency>

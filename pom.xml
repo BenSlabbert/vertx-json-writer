@@ -19,6 +19,7 @@
   <modules>
     <module>example</module>
     <module>processor</module>
+    <module>annotation</module>
   </modules>
 
   <distributionManagement>
