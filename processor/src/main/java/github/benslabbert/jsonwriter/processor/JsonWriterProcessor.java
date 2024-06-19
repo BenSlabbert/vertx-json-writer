@@ -2,6 +2,7 @@
 package github.benslabbert.jsonwriter.processor;
 
 import com.google.auto.service.AutoService;
+import com.squareup.javapoet.TypeName;
 import github.benslabbert.jsonwriter.annotation.JsonWriter;
 import io.vertx.core.json.JsonObject;
 import java.io.IOException;
@@ -297,7 +298,8 @@ public class JsonWriterProcessor extends AbstractProcessor {
 
       // if type is declared and java.lang.String it is ok
       if (TypeKind.DECLARED == kind) {
-        String typeString = type.toString();
+        TypeName typeName = TypeName.get(type).withoutAnnotations();
+        String typeString = typeName.toString();
         properties.add(new Property(varName.toString(), true, typeString, kind));
       } else if (kind.isPrimitive()) {
         properties.add(new Property(varName.toString(), false, null, kind));
