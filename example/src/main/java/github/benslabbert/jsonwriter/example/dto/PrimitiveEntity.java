@@ -4,6 +4,7 @@ package github.benslabbert.jsonwriter.example.dto;
 import com.google.auto.value.AutoBuilder;
 import github.benslabbert.jsonwriter.annotation.JsonWriter;
 import io.vertx.core.json.JsonObject;
+import java.util.Set;
 
 @JsonWriter
 public record PrimitiveEntity(
@@ -27,6 +28,10 @@ public record PrimitiveEntity(
 
   public JsonObject toJson() {
     return PrimitiveEntity_JsonWriter.toJson(this);
+  }
+
+  public static Set<String> missingRequiredFields(JsonObject json) {
+    return PrimitiveEntity_JsonWriter.missingRequiredFields(json);
   }
 
   @AutoBuilder
