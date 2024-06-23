@@ -2,6 +2,7 @@
 package github.benslabbert.jsonwriter.processor;
 
 import com.google.auto.service.AutoService;
+import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.TypeName;
 import github.benslabbert.jsonwriter.annotation.JsonWriter;
 import io.vertx.core.json.JsonObject;
@@ -94,6 +95,7 @@ public class JsonWriterProcessor extends AbstractProcessor {
       }
 
       out.println("import " + annotatedClassName + ";");
+      out.println("import com.google.common.collect.ImmutableSet;");
       out.println("import io.vertx.core.json.JsonObject;");
       out.println("import io.vertx.core.json.JsonArray;");
       out.println("import java.util.stream.Collectors;");
@@ -112,11 +114,9 @@ public class JsonWriterProcessor extends AbstractProcessor {
       out.println("\tprivate " + builderSimpleClassName + "() {}");
       out.println();
 
-      // toJson
       toJson(out, properties, simpleClassName);
-
-      // fromJson
       fromJson(out, properties, simpleClassName);
+      missingRequiredFields(out, properties);
 
       out.println("}");
     }
@@ -145,12 +145,6 @@ public class JsonWriterProcessor extends AbstractProcessor {
         } else {
           out.printf("\t\tjson.put(\"%s\", o.%s().toJson());%n", property.name(), property.name());
         }
-
-        System.err.println("property:");
-        System.err.println("kind: " + property.kind());
-        System.err.println("isComplex: " + property.isComplex());
-        System.err.println("name: " + property.name());
-        System.err.println("className: " + property.className());
       }
     }
 
@@ -185,6 +179,20 @@ public class JsonWriterProcessor extends AbstractProcessor {
 
   private static String getSimpleName(String canonicalName) {
     return canonicalName.substring(canonicalName.lastIndexOf('.') + 1);
+  }
+
+  private void missingRequiredFields(PrintWriter out, List<Property> properties) {
+    out.println("\tpublic static ImmutableSet<String> missingRequiredFields(JsonObject json) {");
+    out.println("\t\tImmutableSet.Builder<String> builder = ImmutableSet.builder();");
+    for (Property property : properties) {
+      if (!property.nullable()) {
+        out.printf("\t\tif (null == json.getValue(\"%s\")) {%n", property.name());
+        out.printf("\t\t\tbuilder.add(\"%s\");%n", property.name());
+        out.println("\t\t}");
+      }
+    }
+    out.println("\t\treturn builder.build();");
+    out.println("\t}");
   }
 
   private void fromJson(PrintWriter out, List<Property> properties, String simpleClassName) {
@@ -298,11 +306,13 @@ public class JsonWriterProcessor extends AbstractProcessor {
 
       // if type is declared and java.lang.String it is ok
       if (TypeKind.DECLARED == kind) {
-        TypeName typeName = TypeName.get(type).withoutAnnotations();
-        String typeString = typeName.toString();
-        properties.add(new Property(varName.toString(), true, typeString, kind));
+        TypeName tn = TypeName.get(type);
+        boolean nullable = isNullable(tn);
+        TypeName typeNameWithoutAnnotations = tn.withoutAnnotations();
+        String typeString = typeNameWithoutAnnotations.toString();
+        properties.add(new Property(varName.toString(), nullable, true, typeString, kind));
       } else if (kind.isPrimitive()) {
-        properties.add(new Property(varName.toString(), false, null, kind));
+        properties.add(new Property(varName.toString(), false, false, null, kind));
       } else {
         String msg = String.format("unsupported kind: %s", kind);
         LOGGER.info(msg);
@@ -312,5 +322,16 @@ public class JsonWriterProcessor extends AbstractProcessor {
     return properties;
   }
 
-  private record Property(String name, boolean isComplex, String className, TypeKind kind) {}
+  private boolean isNullable(TypeName tn) {
+    for (AnnotationSpec annotation : tn.annotations) {
+      if (annotation.type.toString().equals("javax.annotation.Nullable")
+          || annotation.type.toString().equals("jakarta.annotation.Nullable")) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  private record Property(
+      String name, boolean nullable, boolean isComplex, String className, TypeKind kind) {}
 }
