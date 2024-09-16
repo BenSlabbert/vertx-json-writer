@@ -4,7 +4,6 @@ package github.benslabbert.jsonwriter.example.dto;
 import com.google.auto.value.AutoBuilder;
 import github.benslabbert.jsonwriter.annotation.JsonWriter;
 import io.vertx.core.json.JsonObject;
-import java.util.Set;
 
 @JsonWriter
 public record Job(String name) {
@@ -19,10 +18,6 @@ public record Job(String name) {
 
   public JsonObject toJson() {
     return Job_JsonWriter.toJson(this);
-  }
-
-  public static Set<String> missingRequiredFields(JsonObject json) {
-    return Job_JsonWriter.missingRequiredFields(json);
   }
 
   @AutoBuilder

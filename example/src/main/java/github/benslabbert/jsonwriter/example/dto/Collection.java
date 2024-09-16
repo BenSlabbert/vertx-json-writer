@@ -34,10 +34,6 @@ public record Collection(
     return Collection_JsonWriter.toJson(this);
   }
 
-  public static Set<String> missingRequiredFields(JsonObject json) {
-    return Collection_JsonWriter.missingRequiredFields(json);
-  }
-
   @AutoBuilder
   public interface Builder {
 

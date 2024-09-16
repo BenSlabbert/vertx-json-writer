@@ -100,6 +100,10 @@ public class JsonWriterProcessor extends AbstractProcessor {
       out.println("import io.vertx.core.json.JsonObject;");
       out.println("import io.vertx.core.json.JsonArray;");
       out.println("import java.util.stream.Collectors;");
+      out.println("import java.time.format.DateTimeFormatter;");
+      out.println("import java.time.LocalDate;");
+      out.println("import java.time.LocalDateTime;");
+      out.println("import java.time.OffsetDateTime;");
       out.println("import javax.annotation.processing.Generated;");
       out.println();
 
@@ -117,7 +121,6 @@ public class JsonWriterProcessor extends AbstractProcessor {
 
       toJson(out, properties, simpleClassName);
       fromJson(out, properties, simpleClassName);
-      missingRequiredFields(out, properties);
 
       out.println("}");
     }
@@ -136,6 +139,8 @@ public class JsonWriterProcessor extends AbstractProcessor {
       } else {
         if (property.className().startsWith("java.lang.")) {
           out.printf("\t\tjson.put(\"%s\", o.%s());%n", property.name(), property.name());
+        } else if (property.className().startsWith("java.time.")) {
+          timeToJson(out, property);
         } else if (property.className().startsWith("java.util.Set")) {
           iterableToJson(out, property);
         } else if (property.className().startsWith("java.util.List")) {
@@ -151,6 +156,24 @@ public class JsonWriterProcessor extends AbstractProcessor {
     out.println("\t\treturn json;");
     out.println("\t}");
     out.println();
+  }
+
+  private void timeToJson(PrintWriter out, Property property) {
+    switch (property.className()) {
+      case "java.time.LocalDate" ->
+          out.printf(
+              "\t\tjson.put(\"%s\", o.%s().format(DateTimeFormatter.ISO_DATE));%n",
+              property.name(), property.name());
+      case "java.time.LocalDateTime" ->
+          out.printf(
+              "\t\tjson.put(\"%s\", o.%s().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));%n",
+              property.name(), property.name());
+      case "java.time.OffsetDateTime" ->
+          out.printf(
+              "\t\tjson.put(\"%s\", o.%s().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME));%n",
+              property.name(), property.name());
+      default -> throw new IllegalArgumentException("Unsupported class: " + property.className());
+    }
   }
 
   private void iterableToJson(PrintWriter out, Property property) {
@@ -181,86 +204,12 @@ public class JsonWriterProcessor extends AbstractProcessor {
     return canonicalName.substring(canonicalName.lastIndexOf('.') + 1);
   }
 
-  private void missingRequiredFields(PrintWriter out, List<Property> properties) {
-    out.println("\tpublic static ImmutableSet<String> missingRequiredFields(JsonObject json) {");
-    out.println("\t\tImmutableSet.Builder<String> builder = ImmutableSet.builder();");
-    for (Property property : properties) {
-      if (!property.nullable()) {
-        String jsonGetter = getJsonGetterWithoutUnBoxing(property);
-        out.printf("\t\tif (null == %s) {%n", jsonGetter);
-        out.printf("\t\t\tbuilder.add(\"%s\");%n", property.name());
-        out.println("\t\t}");
-
-        // if this is one of our type, check it's sub types
-        if (property.isComplex()) {
-          if (property.className().startsWith("java.lang.")) {
-            // no else
-          } else if (property.className().startsWith("java.util.Set")) {
-            iterableMissingRequiredFields(out, property);
-          } else if (property.className().startsWith("java.util.List")) {
-            iterableMissingRequiredFields(out, property);
-          } else if (property.className().startsWith("java.util.Collection")) {
-            iterableMissingRequiredFields(out, property);
-          } else {
-            out.println("\t\telse {");
-            out.printf(
-                "\t\t\tSet<String> fields ="
-                    + " %s.missingRequiredFields(json.getJsonObject(\"%s\"));%n",
-                getSimpleName(property.className()), property.name());
-            out.println("\t\t\tif (!fields.isEmpty()) {");
-            out.println(
-                "\t\t\t\tbuilder.addAll(fields.stream().map(f -> \"%s.\" + f).collect(Collectors.toSet()));"
-                    .formatted(property.name()));
-            out.println("\t\t\t}");
-            out.println("\t\t}");
-          }
-        }
-      }
-    }
-    out.println("\t\treturn builder.build();");
-    out.println("\t}");
-  }
-
-  private void iterableMissingRequiredFields(PrintWriter out, Property property) {
-    String genericType = getGenericType(property.className());
-    if (genericType.startsWith("java.lang.")) {
-      return;
-    }
-
-    out.println("\t\telse {");
-    out.printf("\t\t\tJsonArray array = json.getJsonArray(\"%s\");%n", property.name());
-    out.println("\t\t\tint idx = 0;");
-    out.println("\t\t\tfor (Object a : array) {");
-    out.println("\t\t\t\tif (null == a) {");
-    out.println("\t\t\t\t\tidx++;");
-    out.println("\t\t\t\t\tcontinue;");
-    out.println("\t\t\t\t}");
-    out.println();
-    out.printf("\t\t\t\tif (!(a instanceof JsonObject o)) {%n");
-    out.println("\t\t\t\t\tidx++;");
-    out.println("\t\t\t\t\tcontinue;");
-    out.println("\t\t\t\t}");
-    out.println();
-    out.printf(
-        "\t\t\t\tSet<String> fields = %s.missingRequiredFields(o);%n", getSimpleName(genericType));
-    out.println("\t\t\t\tif (!fields.isEmpty()) {");
-    out.println("\t\t\t\t\tint i = idx;");
-    out.printf(
-        "\t\t\t\t\tbuilder.addAll(fields.stream().map(f -> \"%s[\" + i + \"].\" +"
-            + " f).collect(Collectors.toSet()));%n",
-        property.name());
-    out.println("\t\t\t\t}");
-    out.println("\t\t\t\tidx++;");
-    out.println("\t\t\t}");
-    out.println("\t\t}");
-  }
-
   private void fromJson(PrintWriter out, List<Property> properties, String simpleClassName) {
     out.printf("\tpublic static %s fromJson(JsonObject json) {%n", simpleClassName);
     out.printf("\t\treturn %s.builder()%n", simpleClassName);
 
     for (Property property : properties) {
-      String jsonGetter = getJsonGetterWithUnBoxing(property);
+      String jsonGetter = getJsonGetter(property);
       out.printf("\t\t\t.%s(%s)%n", property.name(), jsonGetter);
     }
 
@@ -269,15 +218,7 @@ public class JsonWriterProcessor extends AbstractProcessor {
     out.println();
   }
 
-  private static String getJsonGetterWithoutUnBoxing(Property property) {
-    return getJsonGetter(property, true);
-  }
-
-  private static String getJsonGetterWithUnBoxing(Property property) {
-    return getJsonGetter(property, false);
-  }
-
-  private static String getJsonGetter(Property property, boolean withoutUnBoxing) {
+  private static String getJsonGetter(Property property) {
     if (!property.isComplex()) {
       return switch (property.kind()) {
         case BOOLEAN -> "json.getBoolean(\"%s\")".formatted(property.name());
@@ -285,24 +226,9 @@ public class JsonWriterProcessor extends AbstractProcessor {
         case LONG -> "json.getLong(\"%s\")".formatted(property.name());
         case FLOAT -> "json.getFloat(\"%s\")".formatted(property.name());
         case DOUBLE -> "json.getDouble(\"%s\")".formatted(property.name());
-        case SHORT -> {
-          if (withoutUnBoxing) {
-            yield "json.getNumber(\"%s\")".formatted(property.name());
-          }
-          yield "json.getNumber(\"%s\").shortValue()".formatted(property.name());
-        }
-        case CHAR -> {
-          if (withoutUnBoxing) {
-            yield "json.getString(\"%s\")".formatted(property.name());
-          }
-          yield "json.getString(\"%s\").charAt(0)".formatted(property.name());
-        }
-        case BYTE -> {
-          if (withoutUnBoxing) {
-            yield "json.getBinary(\"%s\")".formatted(property.name());
-          }
-          yield "json.getBinary(\"%s\")[0]".formatted(property.name());
-        }
+        case SHORT -> "json.getNumber(\"%s\").shortValue()".formatted(property.name());
+        case CHAR -> "json.getString(\"%s\").charAt(0)".formatted(property.name());
+        case BYTE -> "json.getBinary(\"%s\")[0]".formatted(property.name());
         default ->
             throw new IllegalArgumentException("Unsupported primitive type: " + property.kind);
       };
@@ -311,10 +237,6 @@ public class JsonWriterProcessor extends AbstractProcessor {
     if (property.className().startsWith("java.util.Set")
         || property.className().startsWith("java.util.List")
         || property.className().startsWith("java.util.Collection")) {
-
-      if (withoutUnBoxing) {
-        return "json.getJsonArray(\"%s\")".formatted(property.name());
-      }
 
       String collector = "toList()";
       if (property.className().startsWith("java.util.Set")) {
@@ -366,8 +288,21 @@ public class JsonWriterProcessor extends AbstractProcessor {
       };
     }
 
-    if (withoutUnBoxing) {
-      return "json.getJsonObject(\"%s\")".formatted(property.name());
+    if (property.className().startsWith("java.time.")) {
+      return switch (property.className()) {
+        case "java.time.LocalDate" ->
+            "LocalDate.parse(json.getString(\"%s\"), DateTimeFormatter.ISO_DATE)"
+                .formatted(property.name());
+        case "java.time.LocalDateTime" ->
+            "LocalDateTime.parse(json.getString(\"%s\"), DateTimeFormatter.ISO_LOCAL_DATE_TIME)"
+                .formatted(property.name());
+        case "java.time.OffsetDateTime" ->
+            "OffsetDateTime.parse(json.getString(\"%s\"), DateTimeFormatter.ISO_OFFSET_DATE_TIME)"
+                .formatted(property.name());
+        default ->
+            throw new IllegalArgumentException(
+                "Unsupported java.time.* type: " + property.className());
+      };
     }
 
     return "%s.fromJson(json.getJsonObject(\"%s\"))"
