@@ -1,7 +1,6 @@
 /* Licensed under Apache-2.0 2024. */
 package github.benslabbert.jsonwriter.processor;
 
-import com.google.auto.service.AutoService;
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.TypeName;
 import github.benslabbert.jsonwriter.annotation.JsonWriter;
@@ -15,7 +14,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
 import javax.annotation.processing.AbstractProcessor;
-import javax.annotation.processing.Processor;
 import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
@@ -27,7 +25,6 @@ import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.tools.JavaFileObject;
 
-@AutoService(Processor.class)
 public class JsonWriterProcessor extends AbstractProcessor {
 
   private static final Logger LOGGER = Logger.getLogger(JsonWriterProcessor.class.getName());
