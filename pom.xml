@@ -69,7 +69,7 @@
               <keepBlankLines>true</keepBlankLines>
               <nrOfIndentSpace>2</nrOfIndentSpace>
               <predefinedSortOrder>recommended_2008_06</predefinedSortOrder>
-              <sortDependencies>scope,group,artifactId</sortDependencies>
+              <sortDependencies>scope,groupId,artifactId</sortDependencies>
               <sortPlugins>groupId,artifactId</sortPlugins>
             </sortPom>
           </pom>
@@ -95,15 +95,6 @@
               <delimiter>package</delimiter>
             </licenseHeader>
           </java>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <configuration>
-          <source>${java.version}</source>
-          <target>${java.version}</target>
-          <encoding>${project.build.sourceEncoding}</encoding>
         </configuration>
       </plugin>
       <plugin>
@@ -134,6 +125,26 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>flatten-maven-plugin</artifactId>
+        <configuration>
+          <updatePomFile>true</updatePomFile>
+          <flattenMode>resolveCiFriendliesOnly</flattenMode>
+        </configuration>
+        <executions>
+          <execution>
+            <id>flatten</id>
+            <goals>
+              <goal>flatten</goal>
+            </goals>
+            <phase>process-resources</phase>
+          </execution>
+          <execution>
+            <id>flatten.clean</id>
+            <goals>
+              <goal>clean</goal>
+            </goals>
+            <phase>clean</phase>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   </build>
