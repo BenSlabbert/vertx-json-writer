@@ -241,9 +241,9 @@ public class JsonWriterProcessor extends AbstractProcessor {
       }
 
       return switch (getGenericType(property.className())) {
-          // if the generic type is a java type we cast
-          // if it is something else, we get a JsonObject type and call a from json class and
-          // collect it
+        // if the generic type is a java type we cast
+        // if it is something else, we get a JsonObject type and call a from json class and
+        // collect it
         case "java.lang.String" ->
             "json.getJsonArray(\"%s\").stream().map(s -> (String) s).%s"
                 .formatted(property.name(), collector);
