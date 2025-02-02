@@ -1,9 +1,9 @@
 /* Licensed under Apache-2.0 2024. */
-package github.benslabbert.jsonwriter.processor;
+package github.benslabbert.vertxjsonwriter.processor;
 
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.TypeName;
-import github.benslabbert.jsonwriter.annotation.JsonWriter;
+import github.benslabbert.vertxjsonwriter.annotation.JsonWriter;
 import io.vertx.core.json.JsonObject;
 import java.io.IOException;
 import java.io.PrintWriter;

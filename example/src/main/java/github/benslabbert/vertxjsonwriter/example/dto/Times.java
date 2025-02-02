@@ -1,8 +1,8 @@
 /* Licensed under Apache-2.0 2024. */
-package github.benslabbert.jsonwriter.example.dto;
+package github.benslabbert.vertxjsonwriter.example.dto;
 
 import com.google.auto.value.AutoBuilder;
-import github.benslabbert.jsonwriter.annotation.JsonWriter;
+import github.benslabbert.vertxjsonwriter.annotation.JsonWriter;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;

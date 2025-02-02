@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>github.benslabbert.jsonwriter</groupId>
+    <groupId>github.benslabbert.vertx-json-writer</groupId>
     <artifactId>json-writer-parent</artifactId>
     <version>${revision}</version>
   </parent>
@@ -20,7 +20,7 @@
       <artifactId>javapoet</artifactId>
     </dependency>
     <dependency>
-      <groupId>github.benslabbert.jsonwriter</groupId>
+      <groupId>github.benslabbert.vertx-json-writer</groupId>
       <artifactId>annotation</artifactId>
       <version>${revision}</version>
     </dependency>

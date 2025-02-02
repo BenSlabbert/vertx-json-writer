@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>github.benslabbert.jsonwriter</groupId>
+    <groupId>github.benslabbert.vertx-json-writer</groupId>
     <artifactId>json-writer-parent</artifactId>
     <version>${revision}</version>
   </parent>
@@ -20,12 +20,12 @@
       <artifactId>guava</artifactId>
     </dependency>
     <dependency>
-      <groupId>github.benslabbert.jsonwriter</groupId>
+      <groupId>github.benslabbert.vertx-json-writer</groupId>
       <artifactId>annotation</artifactId>
       <version>${revision}</version>
     </dependency>
     <dependency>
-      <groupId>github.benslabbert.jsonwriter</groupId>
+      <groupId>github.benslabbert.vertx-json-writer</groupId>
       <artifactId>processor</artifactId>
       <version>${revision}</version>
     </dependency>
@@ -71,14 +71,14 @@
               <version>${google-auto-value.version}</version>
             </path>
             <path>
-              <groupId>github.benslabbert.jsonwriter</groupId>
+              <groupId>github.benslabbert.vertx-json-writer</groupId>
               <artifactId>processor</artifactId>
               <version>${revision}</version>
             </path>
           </annotationProcessorPaths>
           <compilerArgs>
             <arg>-parameters</arg>
-            <arg>-Apackage=github.benslabbert.jsonwriter.dto</arg>
+            <arg>-Apackage=github.benslabbert.vertxjsonwriter.dto</arg>
           </compilerArgs>
         </configuration>
       </plugin>

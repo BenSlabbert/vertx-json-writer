@@ -1,5 +1,5 @@
 /* Licensed under Apache-2.0 2024. */
-package github.benslabbert.jsonwriter.processor;
+package github.benslabbert.vertxjsonwriter.processor;
 
 import static com.google.common.truth.Truth.assertAbout;
 import static com.google.common.truth.Truth.assertThat;

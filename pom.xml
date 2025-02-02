@@ -8,7 +8,7 @@
     <version>1.92.0</version>
   </parent>
 
-  <groupId>github.benslabbert.jsonwriter</groupId>
+  <groupId>github.benslabbert.vertx-json-writer</groupId>
   <artifactId>json-writer-parent</artifactId>
   <version>${revision}</version>
   <packaging>pom</packaging>
@@ -20,6 +20,7 @@
     <module>example</module>
     <module>processor</module>
     <module>annotation</module>
+    <module>bom</module>
   </modules>
 
   <distributionManagement>
