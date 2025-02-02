@@ -1,7 +1,7 @@
 /* Licensed under Apache-2.0 2024. */
 package my.test;
 
-import github.benslabbert.jsonwriter.annotation.JsonWriter;
+import github.benslabbert.vertxjsonwriter.annotation.JsonWriter;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import java.time.LocalDate;
