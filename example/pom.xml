@@ -78,7 +78,6 @@
           </annotationProcessorPaths>
           <compilerArgs>
             <arg>-parameters</arg>
-            <arg>-Apackage=github.benslabbert.vertxjsonwriter.dto</arg>
           </compilerArgs>
         </configuration>
       </plugin>
