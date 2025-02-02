@@ -19,6 +19,7 @@ import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.Name;
+import javax.lang.model.element.NestingKind;
 import javax.lang.model.element.RecordComponentElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeKind;
@@ -57,11 +58,21 @@ public class JsonWriterProcessor extends AbstractProcessor {
   }
 
   private void generate(Element e) throws IOException {
-    if (!TypeElement.class.isAssignableFrom(e.getClass())) {
+    if (ElementKind.RECORD != e.getKind()) {
+      processingEnv.getMessager().printError("can only generate JsonWriters on record types", e);
       return;
     }
 
     TypeElement te = (TypeElement) e;
+
+    if (NestingKind.TOP_LEVEL != te.getNestingKind() && NestingKind.MEMBER != te.getNestingKind()) {
+      processingEnv
+          .getMessager()
+          .printError("can only generate JsonWriters on top level or member types", e);
+      return;
+    }
+
+    boolean isMember = NestingKind.MEMBER == te.getNestingKind();
 
     List<Property> properties = getProperties(te);
 
@@ -74,7 +85,13 @@ public class JsonWriterProcessor extends AbstractProcessor {
     String packageName = null;
     int lastDot = annotatedClassName.lastIndexOf('.');
     if (lastDot > 0) {
-      packageName = annotatedClassName.substring(0, lastDot);
+      if (isMember) {
+        packageName = getMemberClassPackage(annotatedClassName);
+        annotatedClassName = getMemberClassName(packageName, annotatedClassName);
+        lastDot = annotatedClassName.lastIndexOf('.');
+      } else {
+        packageName = annotatedClassName.substring(0, lastDot);
+      }
     }
 
     // simpleClassName this will be what we return from our method
@@ -91,7 +108,13 @@ public class JsonWriterProcessor extends AbstractProcessor {
         out.println();
       }
 
-      out.println("import " + annotatedClassName + ";");
+      // if this is a nested class name we need to undo our renaming here
+      if (isMember) {
+        String tmp = annotatedClassName.replace('_', '.');
+        out.println("import " + tmp + ";");
+      } else {
+        out.println("import " + annotatedClassName + ";");
+      }
       out.println("import com.google.common.collect.ImmutableSet;");
       out.println("import java.util.Set;");
       out.println("import io.vertx.core.json.JsonObject;");
@@ -123,7 +146,35 @@ public class JsonWriterProcessor extends AbstractProcessor {
     }
   }
 
+  private static String getMemberClassPackage(String canonicalName) {
+    // canonicalName=my.test.Nested.Inner
+    // should be=my.test.Nested
+    int firstClassIdx = 0;
+    for (int i = 0; i < canonicalName.length(); i++) {
+      if (Character.isUpperCase(canonicalName.charAt(i))) {
+        firstClassIdx = i;
+        break;
+      }
+    }
+    return canonicalName.substring(0, firstClassIdx - 1);
+  }
+
+  private static String getMemberClassName(String packageName, String canonicalName) {
+    // canonicalName=my.test.Nested.Inner
+    // should be=my.test.Nested_Inner
+    int firstClassIdx = 0;
+    for (int i = 0; i < canonicalName.length(); i++) {
+      if (Character.isUpperCase(canonicalName.charAt(i))) {
+        firstClassIdx = i;
+        break;
+      }
+    }
+    String s = canonicalName.substring(firstClassIdx).replace('.', '_');
+    return packageName + "." + s;
+  }
+
   private void toJson(PrintWriter out, List<Property> properties, String simpleClassName) {
+    simpleClassName = simpleClassName.replace('_', '.');
     out.printf("\tpublic static JsonObject toJson(%s %s) {%n", simpleClassName, "o");
     out.println("\t\tJsonObject json = new JsonObject();");
 
@@ -202,6 +253,7 @@ public class JsonWriterProcessor extends AbstractProcessor {
   }
 
   private void fromJson(PrintWriter out, List<Property> properties, String simpleClassName) {
+    simpleClassName = simpleClassName.replace('_', '.');
     out.printf("\tpublic static %s fromJson(JsonObject json) {%n", simpleClassName);
     out.printf("\t\treturn %s.builder()%n", simpleClassName);
 
@@ -302,12 +354,22 @@ public class JsonWriterProcessor extends AbstractProcessor {
       };
     }
 
+    // if this is an inner class we need to fix the name
     return "%s.fromJson(json.getJsonObject(\"%s\"))"
         .formatted(simpleName(property.className()), property.name());
   }
 
   private static String simpleName(String classname) {
-    return classname.substring(classname.lastIndexOf('.') + 1);
+    // my.test.Nested.Inner
+    // if this is an inner type, return Nested.Inner
+    int firstClassIdx = 0;
+    for (int i = 0; i < classname.length(); i++) {
+      if (Character.isUpperCase(classname.charAt(i))) {
+        firstClassIdx = i;
+        break;
+      }
+    }
+    return classname.substring(firstClassIdx);
   }
 
   private List<Property> getProperties(Element e) {
@@ -319,7 +381,6 @@ public class JsonWriterProcessor extends AbstractProcessor {
             .toList();
 
     for (Element enclosedElement : recordComponents) {
-
       RecordComponentElement re = (RecordComponentElement) enclosedElement;
       // name of the variable
       Name varName = re.getSimpleName();
