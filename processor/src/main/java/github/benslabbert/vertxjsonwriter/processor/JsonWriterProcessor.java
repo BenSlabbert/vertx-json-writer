@@ -147,8 +147,6 @@ public class JsonWriterProcessor extends AbstractProcessor {
   }
 
   private static String getMemberClassPackage(String canonicalName) {
-    // canonicalName=my.test.Nested.Inner
-    // should be=my.test.Nested
     int firstClassIdx = 0;
     for (int i = 0; i < canonicalName.length(); i++) {
       if (Character.isUpperCase(canonicalName.charAt(i))) {
@@ -160,8 +158,6 @@ public class JsonWriterProcessor extends AbstractProcessor {
   }
 
   private static String getMemberClassName(String packageName, String canonicalName) {
-    // canonicalName=my.test.Nested.Inner
-    // should be=my.test.Nested_Inner
     int firstClassIdx = 0;
     for (int i = 0; i < canonicalName.length(); i++) {
       if (Character.isUpperCase(canonicalName.charAt(i))) {
