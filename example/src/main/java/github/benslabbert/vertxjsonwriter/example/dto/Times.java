@@ -11,7 +11,7 @@ import java.time.OffsetDateTime;
 public record Times(LocalDate date, LocalDateTime time, OffsetDateTime offsetDateTime) {
 
   public static Builder builder() {
-    return null;
+    return new AutoBuilder_Times_Builder();
   }
 
   @AutoBuilder
