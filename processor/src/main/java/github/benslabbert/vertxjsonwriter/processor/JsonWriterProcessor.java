@@ -1,12 +1,22 @@
 /* Licensed under Apache-2.0 2024. */
 package github.benslabbert.vertxjsonwriter.processor;
 
+import com.google.common.io.CharSink;
+import com.google.common.io.CharSource;
+import com.google.googlejavaformat.java.Formatter;
+import com.google.googlejavaformat.java.FormatterException;
+import com.google.googlejavaformat.java.JavaFormatterOptions;
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.TypeName;
 import github.benslabbert.vertxjsonwriter.annotation.JsonWriter;
 import io.vertx.core.json.JsonObject;
+import jakarta.annotation.Nonnull;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.Reader;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -57,6 +67,36 @@ public class JsonWriterProcessor extends AbstractProcessor {
     return true;
   }
 
+  private static class StringSource extends CharSource {
+
+    private final StringWriter writer;
+
+    private StringSource(StringWriter writer) {
+      this.writer = writer;
+    }
+
+    @Nonnull
+    @Override
+    public Reader openStream() {
+      return new StringReader(writer.toString());
+    }
+  }
+
+  private static class FileSink extends CharSink {
+
+    private final JavaFileObject builderFile;
+
+    private FileSink(JavaFileObject builderFile) {
+      this.builderFile = builderFile;
+    }
+
+    @Nonnull
+    @Override
+    public Writer openStream() throws IOException {
+      return new PrintWriter(builderFile.openWriter());
+    }
+  }
+
   private void generate(Element e) throws IOException {
     if (ElementKind.RECORD != e.getKind()) {
       processingEnv.getMessager().printError("can only generate JsonWriters on record types", e);
@@ -99,8 +139,10 @@ public class JsonWriterProcessor extends AbstractProcessor {
     String builderClassName = annotatedClassName + "_JsonWriter";
     String builderSimpleClassName = builderClassName.substring(lastDot + 1);
 
-    JavaFileObject builderFile = processingEnv.getFiler().createSourceFile(builderClassName);
-    try (PrintWriter out = new PrintWriter(builderFile.openWriter())) {
+    // 8k should be big enough for most files without needing a resize
+    StringWriter stringWriter = new StringWriter(8 * 1024);
+
+    try (PrintWriter out = new PrintWriter(stringWriter)) {
       if (packageName != null) {
         out.print("package ");
         out.print(packageName);
@@ -143,6 +185,27 @@ public class JsonWriterProcessor extends AbstractProcessor {
       fromJson(out, properties, simpleClassName);
 
       out.println("}");
+    }
+
+    JavaFileObject builderFile = processingEnv.getFiler().createSourceFile(builderClassName);
+    formatFile(stringWriter, builderFile);
+  }
+
+  private void formatFile(StringWriter writer, JavaFileObject builderFile) {
+    try {
+      CharSource source = new StringSource(writer);
+      CharSink output = new FileSink(builderFile);
+
+      JavaFormatterOptions options =
+          JavaFormatterOptions.builder()
+              .formatJavadoc(true)
+              .reorderModifiers(true)
+              .style(JavaFormatterOptions.Style.GOOGLE)
+              .build();
+
+      new Formatter(options).formatSource(source, output);
+    } catch (FormatterException | IOException e) {
+      throw new GenerationException(e);
     }
   }
 
