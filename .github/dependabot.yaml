@@ -11,6 +11,11 @@ registries:
     url: "https://maven.pkg.github.com/BenSlabbert/git-version-extension"
     username: "BenSlabbert"
     password: "${{ secrets.GH_TOKEN }}"
+  compile-testing:
+    type: "maven-repository"
+    url: "https://maven.pkg.github.com/BenSlabbert/compile-testing"
+    username: "BenSlabbert"
+    password: "${{ secrets.GH_TOKEN }}"
 updates:
 - package-ecosystem: "maven"
   directory: "/"
@@ -20,6 +25,7 @@ updates:
   registries:
   - "vertx-dagger-bom"
   - "git-version-extension"
+  - "compile-testing"
   labels:
   - "dependencies"
   - "automerge"
