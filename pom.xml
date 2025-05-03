@@ -5,7 +5,7 @@
   <parent>
     <groupId>github.benslabbert</groupId>
     <artifactId>vertx-dagger-bom</artifactId>
-    <version>3.7.0</version>
+    <version>3.8.0</version>
   </parent>
 
   <groupId>github.benslabbert.vertx-json-writer</groupId>
@@ -30,19 +30,5 @@
       <url>https://maven.pkg.github.com/BenSlabbert/vertx-json-writer</url>
     </repository>
   </distributionManagement>
-
-  <properties>
-    <javapoet.version>1.13.0</javapoet.version>
-  </properties>
-
-  <dependencyManagement>
-    <dependencies>
-      <dependency>
-        <groupId>com.squareup</groupId>
-        <artifactId>javapoet</artifactId>
-        <version>${javapoet.version}</version>
-      </dependency>
-    </dependencies>
-  </dependencyManagement>
 
 </project>
