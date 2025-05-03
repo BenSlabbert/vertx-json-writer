@@ -39,7 +39,6 @@
     <dependency>
       <groupId>github.benslabbert.fork</groupId>
       <artifactId>compile-testing</artifactId>
-      <version>${compile-testing.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
