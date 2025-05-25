@@ -18,7 +18,6 @@
     <dependency>
       <groupId>com.palantir.javapoet</groupId>
       <artifactId>javapoet</artifactId>
-      <version>0.7.0</version>
     </dependency>
     <dependency>
       <groupId>github.benslabbert.vertx-json-writer</groupId>
