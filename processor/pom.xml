@@ -16,8 +16,9 @@
       <artifactId>google-java-format</artifactId>
     </dependency>
     <dependency>
-      <groupId>com.squareup</groupId>
+      <groupId>com.palantir.javapoet</groupId>
       <artifactId>javapoet</artifactId>
+      <version>0.7.0</version>
     </dependency>
     <dependency>
       <groupId>github.benslabbert.vertx-json-writer</groupId>
@@ -27,6 +28,10 @@
     <dependency>
       <groupId>io.vertx</groupId>
       <artifactId>vertx-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-json-schema</artifactId>
     </dependency>
     <dependency>
       <groupId>jakarta.annotation</groupId>
@@ -55,8 +60,11 @@
         <artifactId>maven-compiler-plugin</artifactId>
         <configuration>
           <useIncrementalCompilation>true</useIncrementalCompilation>
-          <!--do not run annotation processors-->
-          <compilerArgument>-proc:none</compilerArgument>
+          <compilerArgs>
+            <!--do not run annotation processors-->
+            <arg>-proc:none</arg>
+            <arg>-parameters</arg>
+          </compilerArgs>
         </configuration>
       </plugin>
       <plugin>

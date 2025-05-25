@@ -1,37 +1,60 @@
 /* Licensed under Apache-2.0 2024. */
 package github.benslabbert.vertxjsonwriter.processor;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.common.io.CharSink;
 import com.google.common.io.CharSource;
 import com.google.googlejavaformat.java.Formatter;
 import com.google.googlejavaformat.java.FormatterException;
 import com.google.googlejavaformat.java.JavaFormatterOptions;
-import com.squareup.javapoet.AnnotationSpec;
-import com.squareup.javapoet.TypeName;
+import com.palantir.javapoet.TypeName;
 import github.benslabbert.vertxjsonwriter.annotation.JsonWriter;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.json.schema.Draft;
+import io.vertx.json.schema.JsonSchema;
+import io.vertx.json.schema.JsonSchemaOptions;
+import io.vertx.json.schema.OutputFormat;
+import io.vertx.json.schema.Validator;
+import io.vertx.json.schema.common.dsl.Keywords;
+import io.vertx.json.schema.common.dsl.ObjectSchemaBuilder;
+import io.vertx.json.schema.common.dsl.Schemas;
+import io.vertx.json.schema.common.dsl.StringFormat;
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Null;
+import jakarta.validation.constraints.Size;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import javax.annotation.processing.AbstractProcessor;
+import javax.annotation.processing.Generated;
 import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.SourceVersion;
+import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.Name;
 import javax.lang.model.element.NestingKind;
-import javax.lang.model.element.RecordComponentElement;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.VariableElement;
+import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.tools.JavaFileObject;
@@ -115,7 +138,6 @@ public class JsonWriterProcessor extends AbstractProcessor {
     boolean isMember = NestingKind.MEMBER == te.getNestingKind();
 
     List<Property> properties = getProperties(te);
-
     if (properties.isEmpty()) {
       return;
     }
@@ -157,16 +179,43 @@ public class JsonWriterProcessor extends AbstractProcessor {
       } else {
         out.println("import " + annotatedClassName + ";");
       }
-      out.println("import com.google.common.collect.ImmutableSet;");
-      out.println("import java.util.Set;");
-      out.println("import io.vertx.core.json.JsonObject;");
-      out.println("import io.vertx.core.json.JsonArray;");
-      out.println("import java.util.stream.Collectors;");
-      out.println("import java.time.format.DateTimeFormatter;");
-      out.println("import java.time.LocalDate;");
-      out.println("import java.time.LocalDateTime;");
-      out.println("import java.time.OffsetDateTime;");
-      out.println("import javax.annotation.processing.Generated;");
+      out.printf("import %s;%n", ImmutableSet.class.getCanonicalName());
+      out.printf("import %s;%n", Set.class.getCanonicalName());
+      out.printf("import %s;%n", JsonObject.class.getCanonicalName());
+      out.printf("import %s;%n", JsonArray.class.getCanonicalName());
+      out.printf("import %s;%n", Collectors.class.getCanonicalName());
+      out.printf("import %s;%n", DateTimeFormatter.class.getCanonicalName());
+      out.printf("import %s;%n", LocalDate.class.getCanonicalName());
+      out.printf("import %s;%n", LocalDateTime.class.getCanonicalName());
+      out.printf("import %s;%n", OffsetDateTime.class.getCanonicalName());
+      out.printf("import %s;%n", Generated.class.getCanonicalName());
+      out.printf("import %s;%n", Pattern.class.getCanonicalName());
+      out.printf("import %s;%n", Draft.class.getCanonicalName());
+      out.printf("import %s;%n", OutputFormat.class.getCanonicalName());
+      out.printf("import %s;%n", JsonSchemaOptions.class.getCanonicalName());
+      out.printf("import %s;%n", Validator.class.getCanonicalName());
+      out.printf("import %s;%n", JsonSchema.class.getCanonicalName());
+      out.printf("import %s;%n", ObjectSchemaBuilder.class.getCanonicalName());
+      out.printf("import %s;%n", StringFormat.class.getCanonicalName());
+
+      String keywordsCanonicalName = Keywords.class.getCanonicalName();
+      out.printf("import static %s.maxLength;%n", keywordsCanonicalName);
+      out.printf("import static %s.maximum;%n", keywordsCanonicalName);
+      out.printf("import static %s.minItems;%n", keywordsCanonicalName);
+      out.printf("import static %s.maxItems;%n", keywordsCanonicalName);
+      out.printf("import static %s.minLength;%n", keywordsCanonicalName);
+      out.printf("import static %s.minimum;%n", keywordsCanonicalName);
+      out.printf("import static %s.pattern;%n", keywordsCanonicalName);
+      out.printf("import static %s.uniqueItems;%n", keywordsCanonicalName);
+      out.printf("import static %s.format;%n", keywordsCanonicalName);
+      String schemasCanonicalName = Schemas.class.getCanonicalName();
+      out.printf("import static %s.arraySchema;%n", schemasCanonicalName);
+      out.printf("import static %s.booleanSchema;%n", schemasCanonicalName);
+      out.printf("import static %s.intSchema;%n", schemasCanonicalName);
+      out.printf("import static %s.numberSchema;%n", schemasCanonicalName);
+      out.printf("import static %s.objectSchema;%n", schemasCanonicalName);
+      out.printf("import static %s.stringSchema;%n", schemasCanonicalName);
+
       out.println();
 
       out.printf(
@@ -183,6 +232,7 @@ public class JsonWriterProcessor extends AbstractProcessor {
 
       toJson(out, properties, simpleClassName);
       fromJson(out, properties, simpleClassName);
+      jsonSchema(out, properties);
 
       out.println("}");
     }
@@ -191,8 +241,205 @@ public class JsonWriterProcessor extends AbstractProcessor {
     formatFile(stringWriter, builderFile);
   }
 
+  private void jsonSchema(PrintWriter out, List<Property> properties) {
+    out.println(
+        """
+    public static Validator getValidator() {
+        return Validator.create(
+            schema(),
+            new JsonSchemaOptions()
+                .setBaseUri("https://example.com")
+                .setDraft(Draft.DRAFT7)
+                .setOutputFormat(OutputFormat.Basic));
+    }
+""");
+    out.println();
+    out.println(
+        """
+    static JsonSchema schema() {
+        return JsonSchema.of(schemaBuilder().toJson());
+    }
+""");
+    out.println();
+    out.println(
+        """
+static ObjectSchemaBuilder schemaBuilder() {
+    return objectSchema()
+""");
+
+    for (Property property : properties) {
+      if (property.isComplex()) {
+        if (property.className().startsWith("java.lang.String")) {
+          SchemaGenerator schemaGenerator =
+              new StringSchemaGenerator(
+                  property.name,
+                  !property.nullable,
+                  property.notBlank,
+                  null == property.size || property.size.min() == 0 ? null : property.size.min(),
+                  null == property.size || property.size.max() == Integer.MAX_VALUE
+                      ? null
+                      : property.size.max());
+          String print = schemaGenerator.print();
+          out.println(print);
+          out.println();
+        } else if (property.className().startsWith("java.lang.Boolean")) {
+          SchemaGenerator schemaGenerator =
+              new BooleanSchemaGenerator(property.name, !property.nullable);
+          String print = schemaGenerator.print();
+          out.println(print);
+          out.println();
+        } else if (property.className().startsWith("java.lang.Long")) {
+          SchemaGenerator schemaGenerator =
+              new IntegerSchemaGenerator(
+                  property.name,
+                  !property.nullable,
+                  null == property.min ? null : property.min.value(),
+                  null == property.max ? null : property.max.value());
+          String print = schemaGenerator.print();
+          out.println(print);
+          out.println();
+        } else if (property.className().startsWith("java.lang.Integer")) {
+          SchemaGenerator schemaGenerator =
+              new IntegerSchemaGenerator(
+                  property.name,
+                  !property.nullable,
+                  null == property.min ? null : property.min.value(),
+                  null == property.max ? null : property.max.value());
+          String print = schemaGenerator.print();
+          out.println(print);
+          out.println();
+        } else if (property.className().startsWith("java.lang.Double")) {
+          SchemaGenerator schemaGenerator =
+              new IntegerSchemaGenerator(
+                  property.name,
+                  !property.nullable,
+                  null == property.min ? null : property.min.value(),
+                  null == property.max ? null : property.max.value());
+          String print = schemaGenerator.print();
+          out.println(print);
+          out.println();
+        } else if (property.className().startsWith("java.time.LocalDate")) {
+          SchemaGenerator schemaGenerator =
+              new DateSchemaGenerator(property.name, !property.nullable);
+          String print = schemaGenerator.print();
+          out.println(print);
+          out.println();
+        } else if (property.className().startsWith("java.time.LocalDateTime")) {
+          SchemaGenerator schemaGenerator =
+              new DateSchemaGenerator(property.name, !property.nullable);
+          String print = schemaGenerator.print();
+          out.println(print);
+          out.println();
+        } else if (property.className().startsWith("java.time.OffsetDateTime")) {
+          SchemaGenerator schemaGenerator =
+              new DateTimeSchemaGenerator(property.name, !property.nullable);
+          String print = schemaGenerator.print();
+          out.println(print);
+          out.println();
+        } else if (property.className().startsWith("java.util.Set")
+            || property.className().startsWith("java.util.List")
+            || property.className().startsWith("java.util.Collection")) {
+          List<GenericParameterAnnotation> gpa = property.genericParameterAnnotations();
+          var notNull = gpa.stream().anyMatch(f -> f instanceof GenericParameterAnnotation.NotNull);
+          var notBlank =
+              gpa.stream().anyMatch(f -> f instanceof GenericParameterAnnotation.NotBlank);
+          var maybeSize =
+              gpa.stream()
+                  .filter(f -> f instanceof GenericParameterAnnotation.Size)
+                  .map(s -> (GenericParameterAnnotation.Size) s)
+                  .findFirst();
+          var maybeMin =
+              gpa.stream()
+                  .filter(f -> f instanceof GenericParameterAnnotation.Min)
+                  .map(s -> (GenericParameterAnnotation.Min) s)
+                  .findFirst();
+          var maybeMax =
+              gpa.stream()
+                  .filter(f -> f instanceof GenericParameterAnnotation.Max)
+                  .map(s -> (GenericParameterAnnotation.Max) s)
+                  .findFirst();
+
+          SchemaGenerator itemSchemaGenerator =
+              switch (getGenericType(property.className())) {
+                case "java.lang.String" ->
+                    new StringSchemaGenerator(
+                        null,
+                        notNull,
+                        notBlank,
+                        maybeSize.map(GenericParameterAnnotation.Size::min).orElse(null),
+                        maybeSize.map(GenericParameterAnnotation.Size::max).orElse(null));
+                case "java.lang.Boolean" -> new BooleanSchemaGenerator(null, notNull);
+                case "java.lang.Long", "java.lang.Integer" ->
+                    new IntegerSchemaGenerator(
+                        null,
+                        notNull,
+                        maybeMin.isPresent() ? maybeMin.get().value() : null,
+                        maybeMax.isPresent() ? maybeMax.get().value() : null);
+                case "java.lang.Float", "java.lang.Double" ->
+                    new NumberSchemaGenerator(
+                        null,
+                        notNull,
+                        maybeMin.isPresent() ? maybeMin.get().value() : null,
+                        maybeMax.isPresent() ? maybeMax.get().value() : null);
+                default ->
+                    new ObjectSchemaGenerator(null, notNull, getGenericType(property.className));
+              };
+          SchemaGenerator schemaGenerator =
+              new ArraySchemaGenerator(
+                  property.name,
+                  !property.nullable,
+                  true,
+                  itemSchemaGenerator,
+                  null == property.size || property.size.min() == 0 ? null : property.size.min(),
+                  null == property.size || property.size.max() == Integer.MAX_VALUE
+                      ? null
+                      : property.size.max());
+          String print = schemaGenerator.print();
+          out.println(print);
+          out.println();
+        } else {
+          SchemaGenerator schemaGenerator =
+              new ObjectSchemaGenerator(property.name, !property.nullable, property.className);
+          String print = schemaGenerator.print();
+          out.println(print);
+          out.println();
+        }
+      } else {
+        SchemaGenerator schemaGenerator =
+            switch (property.kind) {
+              case CHAR, BYTE -> new StringSchemaGenerator(property.name, true, true, 1, 1);
+              case LONG, INT, SHORT ->
+                  new IntegerSchemaGenerator(
+                      property.name,
+                      true,
+                      null == property.min ? null : property.min.value(),
+                      null == property.max ? null : property.max.value());
+              case DOUBLE, FLOAT ->
+                  new NumberSchemaGenerator(
+                      property.name,
+                      true,
+                      null == property.min ? null : property.min.value(),
+                      null == property.max ? null : property.max.value());
+              case BOOLEAN -> new BooleanSchemaGenerator(property.name, true);
+              default ->
+                  throw new IllegalArgumentException(
+                      "Unsupported primitive type: " + property.kind);
+            };
+        String print = schemaGenerator.print();
+        out.println(print);
+        out.println();
+      }
+    }
+
+    out.println("\t;");
+    out.println("\t}");
+  }
+
   private void formatFile(StringWriter writer, JavaFileObject builderFile) {
     try {
+      System.err.println("output");
+      System.err.println(writer.toString());
+      System.err.println("##############");
       CharSource source = new StringSource(writer);
       CharSink output = new FileSink(builderFile);
 
@@ -434,29 +681,50 @@ public class JsonWriterProcessor extends AbstractProcessor {
   private List<Property> getProperties(Element e) {
     List<Property> properties = new ArrayList<>();
 
+    // RecordComponentElement does not work here as the annotations do not have
+    // @Target(ElementType.RECORD_COMPONENT) as their target
     List<? extends Element> recordComponents =
-        e.getEnclosedElements().stream()
-            .filter(f -> f.getKind() == ElementKind.RECORD_COMPONENT)
-            .toList();
+        e.getEnclosedElements().stream().filter(f -> f.getKind() == ElementKind.FIELD).toList();
 
     for (Element enclosedElement : recordComponents) {
-      RecordComponentElement re = (RecordComponentElement) enclosedElement;
+      VariableElement re = (VariableElement) enclosedElement;
       // name of the variable
       Name varName = re.getSimpleName();
       // type of the variable
       TypeMirror type = re.asType();
       // TypeKind.DECLARED -> this is an object
       TypeKind kind = type.getKind();
+      Min min = re.getAnnotation(Min.class);
+      Max max = re.getAnnotation(Max.class);
+      Size size = re.getAnnotation(Size.class);
 
       // if type is declared and java.lang.String it is ok
       if (TypeKind.DECLARED == kind) {
         TypeName tn = TypeName.get(type);
-        boolean nullable = isNullable(tn);
+        boolean nullable = null != re.getAnnotation(Nullable.class);
+        boolean notBlank = null != re.getAnnotation(NotBlank.class);
+
+        List<GenericParameterAnnotation> genericParameterAnnotations =
+            getGenericParameterAnnotations((DeclaredType) type);
+
         TypeName typeNameWithoutAnnotations = tn.withoutAnnotations();
         String typeString = typeNameWithoutAnnotations.toString();
-        properties.add(new Property(varName.toString(), nullable, true, typeString, kind));
+        properties.add(
+            new Property(
+                varName.toString(),
+                nullable,
+                true,
+                typeString,
+                kind,
+                notBlank,
+                min,
+                max,
+                size,
+                genericParameterAnnotations));
       } else if (kind.isPrimitive()) {
-        properties.add(new Property(varName.toString(), false, false, null, kind));
+        properties.add(
+            new Property(
+                varName.toString(), false, false, null, kind, false, min, max, size, List.of()));
       } else {
         String msg = String.format("unsupported kind: %s", kind);
         LOGGER.info(msg);
@@ -466,16 +734,129 @@ public class JsonWriterProcessor extends AbstractProcessor {
     return properties;
   }
 
-  private boolean isNullable(TypeName tn) {
-    for (AnnotationSpec annotation : tn.annotations) {
-      if (annotation.type.toString().equals("javax.annotation.Nullable")
-          || annotation.type.toString().equals("jakarta.annotation.Nullable")) {
-        return true;
+  private List<GenericParameterAnnotation> getGenericParameterAnnotations(
+      DeclaredType declaredType) {
+    List<? extends TypeMirror> ta = declaredType.getTypeArguments();
+    if (ta.isEmpty()) {
+      return List.of();
+    }
+    if (ta.size() > 1) {
+      throw new GenerationException("only support generic types with single generic type argument");
+    }
+
+    TypeMirror genericParameter = ta.getFirst();
+    List<GenericParameterAnnotation> arr = new ArrayList<>();
+
+    for (AnnotationMirror am : genericParameter.getAnnotationMirrors()) {
+      DeclaredType annotationType = am.getAnnotationType();
+      Element element = annotationType.asElement();
+      String annotationClassName = element.asType().toString();
+      switch (annotationClassName) {
+        case "jakarta.validation.constraints.NotNull" -> {
+          GenericParameterAnnotation a = GenericParameterAnnotation.NotNull.create(am);
+          arr.add(a);
+        }
+        case "jakarta.validation.constraints.NotBlank" -> {
+          GenericParameterAnnotation a = GenericParameterAnnotation.NotBlank.create(am);
+          arr.add(a);
+        }
+        case "jakarta.validation.constraints.Min" -> {
+          GenericParameterAnnotation a = GenericParameterAnnotation.Min.create(am);
+          arr.add(a);
+        }
+        case "jakarta.validation.constraints.Max" -> {
+          GenericParameterAnnotation a = GenericParameterAnnotation.Max.create(am);
+          arr.add(a);
+        }
+        case "jakarta.validation.constraints.Size" -> {
+          GenericParameterAnnotation a = GenericParameterAnnotation.Size.create(am);
+          arr.add(a);
+        }
+        case null, default ->
+            throw new GenerationException("unsupported annotation: " + annotationClassName);
       }
     }
-    return false;
+
+    return List.copyOf(arr);
   }
 
   private record Property(
-      String name, boolean nullable, boolean isComplex, String className, TypeKind kind) {}
+      String name,
+      boolean nullable,
+      boolean isComplex,
+      String className,
+      TypeKind kind,
+      boolean notBlank,
+      Min min,
+      Max max,
+      Size size,
+      List<GenericParameterAnnotation> genericParameterAnnotations) {}
+
+  private sealed interface GenericParameterAnnotation
+      permits GenericParameterAnnotation.NotNull,
+          GenericParameterAnnotation.NotBlank,
+          GenericParameterAnnotation.Min,
+          GenericParameterAnnotation.Max,
+          GenericParameterAnnotation.Size {
+
+    record NotNull() implements GenericParameterAnnotation {
+      static NotNull create(AnnotationMirror am) {
+        return new NotNull();
+      }
+    }
+
+    record NotBlank() implements GenericParameterAnnotation {
+      static NotBlank create(AnnotationMirror am) {
+        return new NotBlank();
+      }
+    }
+
+    record Min(long value) implements GenericParameterAnnotation {
+      static Min create(AnnotationMirror am) {
+        long min = 0L;
+        for (var entry : am.getElementValues().entrySet()) {
+          if (entry.getKey().getSimpleName().toString().equals("value")) {
+            min = (long) entry.getValue().getValue();
+          }
+        }
+        return new Min(min);
+      }
+    }
+
+    record Max(long value) implements GenericParameterAnnotation {
+      static Max create(AnnotationMirror am) {
+        long max = 0L;
+        for (var entry : am.getElementValues().entrySet()) {
+          if (entry.getKey().getSimpleName().toString().equals("value")) {
+            max = (long) entry.getValue().getValue();
+          }
+        }
+        return new Max(max);
+      }
+    }
+
+    record Size(@Null Integer min, @Null Integer max) implements GenericParameterAnnotation {
+      static Size create(AnnotationMirror am) {
+        Integer min = null;
+        Integer max = null;
+        for (var entry : am.getElementValues().entrySet()) {
+          int defaultValue = (int) entry.getKey().getDefaultValue().getValue();
+
+          if (entry.getKey().getSimpleName().toString().equals("min")) {
+            min = (int) entry.getValue().getValue();
+            if (min == defaultValue) {
+              min = null;
+            }
+          }
+          if (entry.getKey().getSimpleName().toString().equals("max")) {
+            max = (int) entry.getValue().getValue();
+            if (max == defaultValue) {
+              max = null;
+            }
+          }
+        }
+        return new Size(min, max);
+      }
+    }
+  }
 }

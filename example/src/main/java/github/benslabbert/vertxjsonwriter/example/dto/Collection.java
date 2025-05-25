@@ -4,6 +4,7 @@ package github.benslabbert.vertxjsonwriter.example.dto;
 import com.google.auto.value.AutoBuilder;
 import github.benslabbert.vertxjsonwriter.annotation.JsonWriter;
 import io.vertx.core.json.JsonObject;
+import io.vertx.json.schema.common.dsl.ObjectSchemaBuilder;
 import java.util.List;
 import java.util.Set;
 
@@ -32,6 +33,10 @@ public record Collection(
 
   public JsonObject toJson() {
     return Collection_JsonWriter.toJson(this);
+  }
+
+  static ObjectSchemaBuilder schemaBuilder() {
+    return PrimitiveEntity_JsonWriter.schemaBuilder();
   }
 
   @AutoBuilder
