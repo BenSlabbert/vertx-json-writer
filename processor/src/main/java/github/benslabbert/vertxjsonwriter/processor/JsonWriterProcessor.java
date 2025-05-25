@@ -437,9 +437,6 @@ static ObjectSchemaBuilder schemaBuilder() {
 
   private void formatFile(StringWriter writer, JavaFileObject builderFile) {
     try {
-      System.err.println("output");
-      System.err.println(writer.toString());
-      System.err.println("##############");
       CharSource source = new StringSource(writer);
       CharSink output = new FileSink(builderFile);
 
