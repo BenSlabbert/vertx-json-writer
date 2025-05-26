@@ -310,7 +310,7 @@ static ObjectSchemaBuilder schemaBuilder() {
           out.println();
         } else if (property.className().startsWith("java.lang.Double")) {
           SchemaGenerator schemaGenerator =
-              new IntegerSchemaGenerator(
+              new NumberSchemaGenerator(
                   property.name,
                   !property.nullable,
                   null == property.min ? null : property.min.value(),
@@ -318,19 +318,19 @@ static ObjectSchemaBuilder schemaBuilder() {
           String print = schemaGenerator.print();
           out.println(print);
           out.println();
-        } else if (property.className().startsWith("java.time.LocalDate")) {
+        } else if (property.className().equals("java.time.LocalDate")) {
           SchemaGenerator schemaGenerator =
               new DateSchemaGenerator(property.name, !property.nullable);
           String print = schemaGenerator.print();
           out.println(print);
           out.println();
-        } else if (property.className().startsWith("java.time.LocalDateTime")) {
+        } else if (property.className().equals("java.time.LocalDateTime")) {
           SchemaGenerator schemaGenerator =
-              new DateSchemaGenerator(property.name, !property.nullable);
+              new DateTimeSchemaGenerator(property.name, !property.nullable);
           String print = schemaGenerator.print();
           out.println(print);
           out.println();
-        } else if (property.className().startsWith("java.time.OffsetDateTime")) {
+        } else if (property.className().equals("java.time.OffsetDateTime")) {
           SchemaGenerator schemaGenerator =
               new DateTimeSchemaGenerator(property.name, !property.nullable);
           String print = schemaGenerator.print();
@@ -437,6 +437,7 @@ static ObjectSchemaBuilder schemaBuilder() {
 
   private void formatFile(StringWriter writer, JavaFileObject builderFile) {
     try {
+      System.err.println(writer.toString());
       CharSource source = new StringSource(writer);
       CharSink output = new FileSink(builderFile);
 
