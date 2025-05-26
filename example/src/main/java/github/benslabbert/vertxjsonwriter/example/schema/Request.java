@@ -55,23 +55,23 @@ public record Request(
   public interface Builder {
     Builder data(String data);
 
-    Builder other(String other);
+    Builder other(@Nullable String other);
 
-    Builder integer(int integer);
+    Builder integer(Integer integer);
 
-    Builder number(double number);
+    Builder number(Double number);
 
-    Builder bool(boolean bool);
+    Builder bool(@Nullable Boolean bool);
 
-    Builder localDate(LocalDate localDate);
+    Builder localDate(@Nullable LocalDate localDate);
 
-    Builder localDateTime(LocalDateTime localDateTime);
+    Builder localDateTime(@Nullable LocalDateTime localDateTime);
 
-    Builder offsetDateTime(OffsetDateTime offsetDateTime);
+    Builder offsetDateTime(@Nullable OffsetDateTime offsetDateTime);
 
-    Builder ages(Set<Integer> ages);
+    Builder ages(@Nullable Set<Integer> ages);
 
-    Builder tags(Set<String> tags);
+    Builder tags(@Nullable Set<String> tags);
 
     Builder description(@Nullable String description);
 
