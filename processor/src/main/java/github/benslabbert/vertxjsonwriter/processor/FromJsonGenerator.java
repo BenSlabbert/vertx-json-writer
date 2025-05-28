@@ -85,7 +85,8 @@ class FromJsonGenerator {
       return switch (property.className()) {
         case "java.lang.String" -> "json.getString(\"%s\")".formatted(property.name());
         case "java.lang.Boolean" -> "json.getBoolean(\"%s\")".formatted(property.name());
-        case "java.lang.Integer" -> "json.getInteger(\"%s\")".formatted(property.name());
+        case "java.lang.Integer", "java.lang.Short" ->
+            "json.getInteger(\"%s\")".formatted(property.name());
         case "java.lang.Long" -> "json.getLong(\"%s\")".formatted(property.name());
         case "java.lang.Float" -> "json.getFloat(\"%s\")".formatted(property.name());
         case "java.lang.Double" -> "json.getDouble(\"%s\")".formatted(property.name());
