@@ -140,7 +140,7 @@ static ObjectSchemaBuilder schemaBuilder() {
                         maybeSize.map(GenericParameterAnnotation.Size::min).orElse(null),
                         maybeSize.map(GenericParameterAnnotation.Size::max).orElse(null));
                 case "java.lang.Boolean" -> new BooleanSchemaGenerator(null, notNull);
-                case "java.lang.Long", "java.lang.Integer" ->
+                case "java.lang.Long", "java.lang.Integer", "java.lang.Short" ->
                     new IntegerSchemaGenerator(
                         null,
                         notNull,
@@ -196,8 +196,7 @@ static ObjectSchemaBuilder schemaBuilder() {
                       null == property.max() ? null : property.max().value());
               case BOOLEAN -> new BooleanSchemaGenerator(property.name(), true);
               default ->
-                  throw new IllegalArgumentException(
-                      "Unsupported primitive type: " + property.kind());
+                  throw new GenerationException("Unsupported primitive type: " + property.kind());
             };
         String print = schemaGenerator.print();
         out.println(print);

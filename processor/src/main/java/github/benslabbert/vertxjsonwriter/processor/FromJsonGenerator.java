@@ -92,7 +92,7 @@ class FromJsonGenerator {
       case "java.lang.Float" -> "json.getFloat(\"%s\")".formatted(name);
       case "java.lang.Double" -> "json.getDouble(\"%s\")".formatted(name);
       case null, default ->
-          throw new IllegalArgumentException("Unsupported java.lang.* type: " + className);
+          throw new GenerationException("Unsupported java.lang.* type: " + className);
     };
   }
 
@@ -107,7 +107,7 @@ class FromJsonGenerator {
           "OffsetDateTime.parse(json.getString(\"%s\"), DateTimeFormatter.ISO_OFFSET_DATE_TIME)"
               .formatted(name);
       case null, default ->
-          throw new IllegalArgumentException("Unsupported java.time.* type: " + className);
+          throw new GenerationException("Unsupported java.time.* type: " + className);
     };
   }
 
@@ -121,7 +121,7 @@ class FromJsonGenerator {
       case SHORT -> "json.getInteger(\"%s\").shortValue()".formatted(name);
       case CHAR -> "json.getString(\"%s\").charAt(0)".formatted(name);
       case BYTE -> "json.getBinary(\"%s\")[0]".formatted(name);
-      default -> throw new IllegalArgumentException("Unsupported primitive type: " + kind);
+      default -> throw new GenerationException("Unsupported primitive type: " + kind);
     };
   }
 

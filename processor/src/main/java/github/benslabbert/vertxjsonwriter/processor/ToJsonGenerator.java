@@ -60,7 +60,7 @@ final class ToJsonGenerator {
           out.printf(
               "\t\tjson.put(\"%s\", o.%s().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME));%n",
               name, name);
-      default -> throw new IllegalArgumentException("Unsupported class: " + className);
+      default -> throw new GenerationException("Unsupported class: " + className);
     }
   }
 
