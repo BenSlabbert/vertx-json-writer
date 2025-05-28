@@ -5,6 +5,7 @@ import static github.benslabbert.vertxjsonwriter.processor.Util.getGenericType;
 
 import java.io.PrintWriter;
 import java.util.List;
+import javax.lang.model.type.TypeKind;
 
 class FromJsonGenerator {
 
@@ -16,7 +17,9 @@ class FromJsonGenerator {
     out.printf("\t\treturn %s.builder()%n", simpleClassName);
 
     for (Property property : properties) {
-      String jsonGetter = getJsonGetter(property);
+      String jsonGetter =
+          getJsonGetter(
+              property.name(), property.kind(), property.className(), property.isComplex());
       out.printf("\t\t\t.%s(%s)%n", property.name(), jsonGetter);
     }
 
@@ -25,97 +28,101 @@ class FromJsonGenerator {
     out.println();
   }
 
-  private static String getJsonGetter(Property property) {
-    if (!property.isComplex()) {
-      return switch (property.kind()) {
-        case BOOLEAN -> "json.getBoolean(\"%s\")".formatted(property.name());
-        case INT -> "json.getInteger(\"%s\")".formatted(property.name());
-        case LONG -> "json.getLong(\"%s\")".formatted(property.name());
-        case FLOAT -> "json.getFloat(\"%s\")".formatted(property.name());
-        case DOUBLE -> "json.getDouble(\"%s\")".formatted(property.name());
-        case SHORT -> "json.getNumber(\"%s\").shortValue()".formatted(property.name());
-        case CHAR -> "json.getString(\"%s\").charAt(0)".formatted(property.name());
-        case BYTE -> "json.getBinary(\"%s\")[0]".formatted(property.name());
-        default ->
-            throw new IllegalArgumentException("Unsupported primitive type: " + property.kind());
-      };
+  private static String getJsonGetter(
+      String name, TypeKind kind, String className, boolean isComplex) {
+    if (!isComplex) {
+      return primitiveGetter(kind, name);
     }
 
-    if (property.className().startsWith("java.util.Set")
-        || property.className().startsWith("java.util.List")
-        || property.className().startsWith("java.util.Collection")) {
+    if (className.startsWith("java.util.Set")
+        || className.startsWith("java.util.List")
+        || className.startsWith("java.util.Collection")) {
 
-      String collector = "toList()";
-      if (property.className().startsWith("java.util.Set")) {
-        collector = "collect(Collectors.toSet())";
-      }
-
-      return switch (getGenericType(property.className())) {
-        // if the generic type is a java type we cast
-        // if it is something else, we get a JsonObject type and call a from json class and
-        // collect it
-        case "java.lang.String" ->
-            "json.getJsonArray(\"%s\").stream().map(s -> (String) s).%s"
-                .formatted(property.name(), collector);
-        case "java.lang.Boolean" ->
-            "json.getJsonArray(\"%s\").stream().map(b -> (Boolean) b).%s"
-                .formatted(property.name(), collector);
-        case "java.lang.Integer" ->
-            "json.getJsonArray(\"%s\").stream().map(i -> (Integer) i).%s"
-                .formatted(property.name(), collector);
-        case "java.lang.Long" ->
-            "json.getJsonArray(\"%s\").stream().map(l -> (Long) l).%s"
-                .formatted(property.name(), collector);
-        case "java.lang.Float" ->
-            "json.getJsonArray(\"%s\").stream().map(f -> (Float) f).%s"
-                .formatted(property.name(), collector);
-        case "java.lang.Double" ->
-            "json.getJsonArray(\"%s\").stream().map(d -> (Double) d).%s"
-                .formatted(property.name(), collector);
-        default ->
-            "json.getJsonArray(\"%s\").stream().map(obj -> %s.fromJson((JsonObject) obj)).%s"
-                .formatted(
-                    property.name(),
-                    getSimpleName(getGenericType(property.className())),
-                    collector);
-      };
+      return collectionGetter(name, className);
     }
 
-    if (property.className().startsWith("java.lang.")) {
-      return switch (property.className()) {
-        case "java.lang.String" -> "json.getString(\"%s\")".formatted(property.name());
-        case "java.lang.Boolean" -> "json.getBoolean(\"%s\")".formatted(property.name());
-        case "java.lang.Integer", "java.lang.Short" ->
-            "json.getInteger(\"%s\")".formatted(property.name());
-        case "java.lang.Long" -> "json.getLong(\"%s\")".formatted(property.name());
-        case "java.lang.Float" -> "json.getFloat(\"%s\")".formatted(property.name());
-        case "java.lang.Double" -> "json.getDouble(\"%s\")".formatted(property.name());
-        default ->
-            throw new IllegalArgumentException(
-                "Unsupported java.lang.* type: " + property.className());
-      };
+    if (className.startsWith("java.lang.")) {
+      return javaLangGetter(name, className);
     }
 
-    if (property.className().startsWith("java.time.")) {
-      return switch (property.className()) {
-        case "java.time.LocalDate" ->
-            "LocalDate.parse(json.getString(\"%s\"), DateTimeFormatter.ISO_DATE)"
-                .formatted(property.name());
-        case "java.time.LocalDateTime" ->
-            "LocalDateTime.parse(json.getString(\"%s\"), DateTimeFormatter.ISO_LOCAL_DATE_TIME)"
-                .formatted(property.name());
-        case "java.time.OffsetDateTime" ->
-            "OffsetDateTime.parse(json.getString(\"%s\"), DateTimeFormatter.ISO_OFFSET_DATE_TIME)"
-                .formatted(property.name());
-        default ->
-            throw new IllegalArgumentException(
-                "Unsupported java.time.* type: " + property.className());
-      };
+    if (className.startsWith("java.time.")) {
+      return timeGetter(name, className);
     }
 
     // if this is an inner class we need to fix the name
-    return "%s.fromJson(json.getJsonObject(\"%s\"))"
-        .formatted(simpleName(property.className()), property.name());
+    return "%s.fromJson(json.getJsonObject(\"%s\"))".formatted(simpleName(className), name);
+  }
+
+  private static String collectionGetter(String name, String className) {
+    String collector = "toList()";
+    if (className.startsWith("java.util.Set")) {
+      collector = "collect(Collectors.toSet())";
+    }
+
+    String genericType = getGenericType(className);
+    return switch (genericType) {
+      // if the generic type is a java type we cast
+      // if it is something else, we get a JsonObject type and call a from json class and
+      // collect it
+      case "java.lang.String" ->
+          "json.getJsonArray(\"%s\").stream().map(s -> (String) s).%s".formatted(name, collector);
+      case "java.lang.Boolean" ->
+          "json.getJsonArray(\"%s\").stream().map(b -> (Boolean) b).%s".formatted(name, collector);
+      case "java.lang.Integer" ->
+          "json.getJsonArray(\"%s\").stream().map(i -> (Integer) i).%s".formatted(name, collector);
+      case "java.lang.Long" ->
+          "json.getJsonArray(\"%s\").stream().map(l -> (Long) l).%s".formatted(name, collector);
+      case "java.lang.Float" ->
+          "json.getJsonArray(\"%s\").stream().map(f -> (Float) f).%s".formatted(name, collector);
+      case "java.lang.Double" ->
+          "json.getJsonArray(\"%s\").stream().map(d -> (Double) d).%s".formatted(name, collector);
+      default ->
+          "json.getJsonArray(\"%s\").stream().map(obj -> %s.fromJson((JsonObject) obj)).%s"
+              .formatted(name, getSimpleName(genericType), collector);
+    };
+  }
+
+  private static String javaLangGetter(String name, String className) {
+    return switch (className) {
+      case "java.lang.String" -> "json.getString(\"%s\")".formatted(name);
+      case "java.lang.Boolean" -> "json.getBoolean(\"%s\")".formatted(name);
+      case "java.lang.Integer" -> "json.getInteger(\"%s\")".formatted(name);
+      case "java.lang.Short" -> "json.getInteger(\"%s\").shortValue()".formatted(name);
+      case "java.lang.Long" -> "json.getLong(\"%s\")".formatted(name);
+      case "java.lang.Float" -> "json.getFloat(\"%s\")".formatted(name);
+      case "java.lang.Double" -> "json.getDouble(\"%s\")".formatted(name);
+      case null, default ->
+          throw new IllegalArgumentException("Unsupported java.lang.* type: " + className);
+    };
+  }
+
+  private static String timeGetter(String name, String className) {
+    return switch (className) {
+      case "java.time.LocalDate" ->
+          "LocalDate.parse(json.getString(\"%s\"), DateTimeFormatter.ISO_DATE)".formatted(name);
+      case "java.time.LocalDateTime" ->
+          "LocalDateTime.parse(json.getString(\"%s\"), DateTimeFormatter.ISO_LOCAL_DATE_TIME)"
+              .formatted(name);
+      case "java.time.OffsetDateTime" ->
+          "OffsetDateTime.parse(json.getString(\"%s\"), DateTimeFormatter.ISO_OFFSET_DATE_TIME)"
+              .formatted(name);
+      case null, default ->
+          throw new IllegalArgumentException("Unsupported java.time.* type: " + className);
+    };
+  }
+
+  private static String primitiveGetter(TypeKind kind, String name) {
+    return switch (kind) {
+      case BOOLEAN -> "json.getBoolean(\"%s\")".formatted(name);
+      case INT -> "json.getInteger(\"%s\")".formatted(name);
+      case LONG -> "json.getLong(\"%s\")".formatted(name);
+      case FLOAT -> "json.getFloat(\"%s\")".formatted(name);
+      case DOUBLE -> "json.getDouble(\"%s\")".formatted(name);
+      case SHORT -> "json.getInteger(\"%s\").shortValue()".formatted(name);
+      case CHAR -> "json.getString(\"%s\").charAt(0)".formatted(name);
+      case BYTE -> "json.getBinary(\"%s\")[0]".formatted(name);
+      default -> throw new IllegalArgumentException("Unsupported primitive type: " + kind);
+    };
   }
 
   private static String simpleName(String classname) {

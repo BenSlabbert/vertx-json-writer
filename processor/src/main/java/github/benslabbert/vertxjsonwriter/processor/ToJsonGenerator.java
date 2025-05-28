@@ -20,22 +20,25 @@ final class ToJsonGenerator {
     entries.toBuffer();
 
     for (Property property : properties) {
+      String className = property.className();
+      String name = property.name();
+
       if (!property.isComplex()) {
-        out.printf("\t\tjson.put(\"%s\", o.%s());%n", property.name(), property.name());
+        out.printf("\t\tjson.put(\"%s\", o.%s());%n", name, name);
+        continue;
+      }
+      if (className.startsWith("java.lang.")) {
+        out.printf("\t\tjson.put(\"%s\", o.%s());%n", name, name);
+      } else if (className.startsWith("java.time.")) {
+        timeToJson(out, property.name(), property.className());
+      } else if (className.startsWith("java.util.Set")) {
+        iterableToJson(out, property.name(), property.className());
+      } else if (className.startsWith("java.util.List")) {
+        iterableToJson(out, property.name(), property.className());
+      } else if (className.startsWith("java.util.Collection")) {
+        iterableToJson(out, property.name(), property.className());
       } else {
-        if (property.className().startsWith("java.lang.")) {
-          out.printf("\t\tjson.put(\"%s\", o.%s());%n", property.name(), property.name());
-        } else if (property.className().startsWith("java.time.")) {
-          timeToJson(out, property);
-        } else if (property.className().startsWith("java.util.Set")) {
-          iterableToJson(out, property);
-        } else if (property.className().startsWith("java.util.List")) {
-          iterableToJson(out, property);
-        } else if (property.className().startsWith("java.util.Collection")) {
-          iterableToJson(out, property);
-        } else {
-          out.printf("\t\tjson.put(\"%s\", o.%s().toJson());%n", property.name(), property.name());
-        }
+        out.printf("\t\tjson.put(\"%s\", o.%s().toJson());%n", name, name);
       }
     }
 
@@ -44,41 +47,36 @@ final class ToJsonGenerator {
     out.println();
   }
 
-  private static void timeToJson(PrintWriter out, Property property) {
-    switch (property.className()) {
+  private static void timeToJson(PrintWriter out, String name, String className) {
+    switch (className) {
       case "java.time.LocalDate" ->
           out.printf(
-              "\t\tjson.put(\"%s\", o.%s().format(DateTimeFormatter.ISO_DATE));%n",
-              property.name(), property.name());
+              "\t\tjson.put(\"%s\", o.%s().format(DateTimeFormatter.ISO_DATE));%n", name, name);
       case "java.time.LocalDateTime" ->
           out.printf(
               "\t\tjson.put(\"%s\", o.%s().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));%n",
-              property.name(), property.name());
+              name, name);
       case "java.time.OffsetDateTime" ->
           out.printf(
               "\t\tjson.put(\"%s\", o.%s().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME));%n",
-              property.name(), property.name());
-      default -> throw new IllegalArgumentException("Unsupported class: " + property.className());
+              name, name);
+      default -> throw new IllegalArgumentException("Unsupported class: " + className);
     }
   }
 
-  private static void iterableToJson(PrintWriter out, Property property) {
-    out.printf("\t\tJsonArray %s = new JsonArray();%n", property.name());
-    out.printf("\t\tfor (var i : o.%s()) {%n", property.name());
+  private static void iterableToJson(PrintWriter out, String name, String className) {
+    out.printf("\t\tJsonArray %s = new JsonArray();%n", name);
+    out.printf("\t\tfor (var i : o.%s()) {%n", name);
 
-    if (!property.isComplex()) {
-      out.printf("\t\t\t%s.add(i);%n", property.name());
+    String genericType = getGenericType(className);
+    if (genericType.startsWith("java.lang.")) {
+      out.printf("\t\t\t%s.add(i);%n", name);
     } else {
-      String genericType = getGenericType(property.className());
-      if (genericType.startsWith("java.lang.")) {
-        out.printf("\t\t\t%s.add(i);%n", property.name());
-      } else {
-        out.printf("\t\t\t%s.add(i.toJson());%n", property.name());
-      }
+      out.printf("\t\t\t%s.add(i.toJson());%n", name);
     }
 
     out.println("\t\t}");
-    out.printf("\t\tjson.put(\"%s\", %s);%n", property.name(), property.name());
+    out.printf("\t\tjson.put(\"%s\", %s);%n", name, name);
     out.println();
   }
 }
