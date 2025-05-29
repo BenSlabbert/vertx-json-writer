@@ -63,10 +63,8 @@ public class JsonWriterProcessor extends AbstractProcessor {
   @Override
   public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
     for (TypeElement annotation : annotations) {
-      Set<? extends Element> elementsAnnotatedWith = roundEnv.getElementsAnnotatedWith(annotation);
-
       try {
-        for (Element o : elementsAnnotatedWith) {
+        for (Element o : roundEnv.getElementsAnnotatedWith(annotation)) {
           Instant start = Instant.now();
           generate(o);
           Duration duration = Duration.between(start, Instant.now());
