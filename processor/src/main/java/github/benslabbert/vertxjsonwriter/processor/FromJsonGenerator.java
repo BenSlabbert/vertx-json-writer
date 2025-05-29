@@ -13,18 +13,18 @@ class FromJsonGenerator {
 
   static void fromJson(PrintWriter out, List<Property> properties, String simpleClassName) {
     simpleClassName = simpleClassName.replace('_', '.');
-    out.printf("\tpublic static %s fromJson(JsonObject json) {%n", simpleClassName);
-    out.printf("\t\treturn %s.builder()%n", simpleClassName);
+    out.printf("public static %s fromJson(JsonObject json) {%n", simpleClassName);
+    out.printf("return %s.builder()%n", simpleClassName);
 
     for (Property property : properties) {
       String jsonGetter =
           getJsonGetter(
               property.name(), property.kind(), property.className(), property.isComplex());
-      out.printf("\t\t\t.%s(%s)%n", property.name(), jsonGetter);
+      out.printf(".%s(%s)%n", property.name(), jsonGetter);
     }
 
-    out.println("\t\t\t.build();");
-    out.println("\t}");
+    out.println(".build();");
+    out.println("}");
     out.println();
   }
 

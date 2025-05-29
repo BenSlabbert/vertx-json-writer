@@ -24,8 +24,8 @@ class JsonSchemaGenerator {
       out.println();
     }
 
-    out.println("\t;");
-    out.println("\t}");
+    out.println(";");
+    out.println("}");
   }
 
   private static void writeValidatorMethod(PrintWriter out) {
