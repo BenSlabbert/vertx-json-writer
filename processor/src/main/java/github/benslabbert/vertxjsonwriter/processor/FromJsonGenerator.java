@@ -14,12 +14,19 @@ class FromJsonGenerator {
   static void fromJson(PrintWriter out, List<Property> properties, String simpleClassName) {
     simpleClassName = simpleClassName.replace('_', '.');
     out.printf("public static %s fromJson(JsonObject json) {%n", simpleClassName);
+    out.println("if (null == json) {");
+    out.println("return null;");
+    out.println("}");
     out.printf("return %s.builder()%n", simpleClassName);
 
     for (Property property : properties) {
       String jsonGetter =
           getJsonGetter(
-              property.name(), property.kind(), property.className(), property.isComplex());
+              property.name(),
+              property.kind(),
+              property.className(),
+              property.isComplex(),
+              property.nullable());
       out.printf(".%s(%s)%n", property.name(), jsonGetter);
     }
 
@@ -29,7 +36,8 @@ class FromJsonGenerator {
   }
 
   private static String getJsonGetter(
-      String name, TypeKind kind, String className, boolean isComplex) {
+      String name, TypeKind kind, String className, boolean isComplex, boolean nullable) {
+
     if (!isComplex) {
       return primitiveGetter(kind, name);
     }
@@ -46,7 +54,7 @@ class FromJsonGenerator {
     }
 
     if (className.startsWith("java.time.")) {
-      return timeGetter(name, className);
+      return timeGetter(name, className, nullable);
     }
 
     // if this is an inner class we need to fix the name
@@ -65,15 +73,20 @@ class FromJsonGenerator {
       // if it is something else, we get a JsonObject type and call a from json class and
       // collect it
       case "java.lang.String" ->
-          "json.getJsonArray(\"%s\").stream().map(s -> (String) s).%s".formatted(name, collector);
+          "json.getJsonArray(\"%s\").stream().filter(Objects::nonNull).map(s -> (String) s).%s"
+              .formatted(name, collector);
       case "java.lang.Boolean" ->
-          "json.getJsonArray(\"%s\").stream().map(b -> (Boolean) b).%s".formatted(name, collector);
+          "json.getJsonArray(\"%s\").stream().filter(Objects::nonNull).map(b -> (Boolean) b).%s"
+              .formatted(name, collector);
       case "java.lang.Integer" ->
-          "json.getJsonArray(\"%s\").stream().map(i -> (Integer) i).%s".formatted(name, collector);
+          "json.getJsonArray(\"%s\").stream().filter(Objects::nonNull).map(i -> (Integer) i).%s"
+              .formatted(name, collector);
       case "java.lang.Long" ->
-          "json.getJsonArray(\"%s\").stream().map(l -> (Long) l).%s".formatted(name, collector);
+          "json.getJsonArray(\"%s\").stream().filter(Objects::nonNull).map(l -> (Long) l).%s"
+              .formatted(name, collector);
       case "java.lang.Float" ->
-          "json.getJsonArray(\"%s\").stream().map(f -> (Float) f).%s".formatted(name, collector);
+          "json.getJsonArray(\"%s\").stream().filter(Objects::nonNull).map(f -> (Float) f).%s"
+              .formatted(name, collector);
       case "java.lang.Double" ->
           "json.getJsonArray(\"%s\").stream().map(d -> (Double) d).%s".formatted(name, collector);
       default ->
@@ -96,16 +109,33 @@ class FromJsonGenerator {
     };
   }
 
-  private static String timeGetter(String name, String className) {
+  private static String timeGetter(String name, String className, boolean nullable) {
     return switch (className) {
-      case "java.time.LocalDate" ->
-          "LocalDate.parse(json.getString(\"%s\"), DateTimeFormatter.ISO_DATE)".formatted(name);
-      case "java.time.LocalDateTime" ->
-          "LocalDateTime.parse(json.getString(\"%s\"), DateTimeFormatter.ISO_LOCAL_DATE_TIME)"
-              .formatted(name);
-      case "java.time.OffsetDateTime" ->
-          "OffsetDateTime.parse(json.getString(\"%s\"), DateTimeFormatter.ISO_OFFSET_DATE_TIME)"
-              .formatted(name);
+      case "java.time.LocalDate" -> {
+        if (nullable) {
+          yield "null == json.getString(\"%s\") ? null :"
+              + " LocalDate.parse(json.getString(\"%s\"), DateTimeFormatter.ISO_DATE)";
+        }
+        yield "LocalDate.parse(json.getString(\"%s\"), DateTimeFormatter.ISO_DATE)".formatted(name);
+      }
+      case "java.time.LocalDateTime" -> {
+        if (nullable) {
+          yield "null == json.getString(\"%s\") ? null :"
+              + " LocalDateTime.parse(json.getString(\"%s\"),"
+              + " DateTimeFormatter.ISO_LOCAL_DATE_TIME)";
+        }
+        yield "LocalDateTime.parse(json.getString(\"%s\"), DateTimeFormatter.ISO_LOCAL_DATE_TIME)"
+            .formatted(name);
+      }
+      case "java.time.OffsetDateTime" -> {
+        if (nullable) {
+          yield "null == json.getString(\"%s\") ? null :"
+              + " OffsetDateTime.parse(json.getString(\"%s\"),"
+              + " DateTimeFormatter.ISO_OFFSET_DATE_TIME)";
+        }
+        yield "OffsetDateTime.parse(json.getString(\"%s\"), DateTimeFormatter.ISO_OFFSET_DATE_TIME)"
+            .formatted(name);
+      }
       case null, default ->
           throw new GenerationException("Unsupported java.time.* type: " + className);
     };
