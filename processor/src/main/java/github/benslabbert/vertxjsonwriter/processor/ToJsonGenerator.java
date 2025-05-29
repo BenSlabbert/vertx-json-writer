@@ -11,7 +11,6 @@ final class ToJsonGenerator {
 
   private ToJsonGenerator() {}
 
-  // todo: make null safe
   static void toJson(PrintWriter out, List<Property> properties, String simpleClassName) {
     simpleClassName = simpleClassName.replace('_', '.');
     out.printf("public static JsonObject toJson(%s %s) {%n", simpleClassName, "o");

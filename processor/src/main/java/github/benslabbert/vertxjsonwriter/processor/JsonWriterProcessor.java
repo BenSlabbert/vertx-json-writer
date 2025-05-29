@@ -31,6 +31,7 @@ import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -180,6 +181,7 @@ public class JsonWriterProcessor extends AbstractProcessor {
       out.printf("import %s;%n", JsonSchema.class.getCanonicalName());
       out.printf("import %s;%n", ObjectSchemaBuilder.class.getCanonicalName());
       out.printf("import %s;%n", StringFormat.class.getCanonicalName());
+      out.printf("import %s;%n", Objects.class.getCanonicalName());
 
       String keywordsCanonicalName = Keywords.class.getCanonicalName();
       out.printf("import static %s.maxLength;%n", keywordsCanonicalName);
