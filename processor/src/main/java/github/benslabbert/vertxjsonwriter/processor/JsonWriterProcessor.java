@@ -244,7 +244,13 @@ public class JsonWriterProcessor extends AbstractProcessor {
               .style(JavaFormatterOptions.Style.GOOGLE)
               .build();
 
+      Instant start = Instant.now();
       new Formatter(options).formatSource(source, output);
+      processingEnv
+          .getMessager()
+          .printMessage(
+              Diagnostic.Kind.NOTE,
+              "formatting time %s".formatted(Duration.between(start, Instant.now())));
     } catch (FormatterException | IOException e) {
       throw new GenerationException(e);
     }
