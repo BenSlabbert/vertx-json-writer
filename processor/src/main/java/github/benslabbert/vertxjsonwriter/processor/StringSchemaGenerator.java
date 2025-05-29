@@ -11,6 +11,14 @@ record StringSchemaGenerator(
     @Nullable Integer maxLength)
     implements SchemaGenerator {
 
+  static StringSchemaGenerator create(Property property) {
+    String name = property.name();
+    boolean nullable = property.nullable();
+    boolean notBlank = property.notBlank();
+    return new StringSchemaGenerator(
+        name, !nullable, notBlank, property.getSizeMin(), property.getSizeMax());
+  }
+
   @Override
   public String print() {
     if (!required && notBlank) {

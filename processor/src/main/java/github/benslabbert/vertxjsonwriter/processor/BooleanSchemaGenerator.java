@@ -6,6 +6,12 @@ import jakarta.annotation.Nullable;
 record BooleanSchemaGenerator(@Nullable String fieldName, boolean required)
     implements SchemaGenerator {
 
+  static BooleanSchemaGenerator create(Property property) {
+    String name = property.name();
+    boolean nullable = property.nullable();
+    return new BooleanSchemaGenerator(name, !nullable);
+  }
+
   @Override
   public String print() {
     if (null == fieldName) {
