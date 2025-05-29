@@ -3,7 +3,6 @@ package github.benslabbert.vertxjsonwriter.processor;
 
 import static github.benslabbert.vertxjsonwriter.processor.Util.getGenericType;
 
-import io.vertx.core.json.JsonObject;
 import java.io.PrintWriter;
 import java.util.List;
 
@@ -15,9 +14,6 @@ final class ToJsonGenerator {
     simpleClassName = simpleClassName.replace('_', '.');
     out.printf("public static JsonObject toJson(%s %s) {%n", simpleClassName, "o");
     out.println("JsonObject json = new JsonObject();");
-
-    JsonObject entries = new JsonObject();
-    entries.toBuffer();
 
     for (Property property : properties) {
       String className = property.className();
