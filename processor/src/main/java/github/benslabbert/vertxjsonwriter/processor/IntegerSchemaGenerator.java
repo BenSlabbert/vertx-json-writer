@@ -7,6 +7,13 @@ record IntegerSchemaGenerator(
     @Nullable String fieldName, boolean required, @Nullable Long min, @Nullable Long max)
     implements SchemaGenerator {
 
+  static IntegerSchemaGenerator create(Property property) {
+    String name = property.name();
+    boolean nullable = property.nullable();
+    return new IntegerSchemaGenerator(
+        name, !nullable, property.getMinValue(), property.getMaxValue());
+  }
+
   @Override
   public String print() {
     String schema;
