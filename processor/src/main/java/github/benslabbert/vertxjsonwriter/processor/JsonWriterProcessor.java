@@ -210,7 +210,7 @@ public class JsonWriterProcessor extends AbstractProcessor {
       out.println(" {");
       out.println();
 
-      out.println("\tprivate " + builderSimpleClassName + "() {}");
+      out.println("private " + builderSimpleClassName + "() {}");
       out.println();
 
       ToJsonGenerator.toJson(out, properties, simpleClassName);
