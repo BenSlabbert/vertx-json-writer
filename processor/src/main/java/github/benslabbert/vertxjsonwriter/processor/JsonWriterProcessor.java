@@ -26,6 +26,8 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.time.Duration;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
@@ -43,6 +45,7 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.NestingKind;
 import javax.lang.model.element.TypeElement;
+import javax.tools.Diagnostic;
 import javax.tools.JavaFileObject;
 
 public class JsonWriterProcessor extends AbstractProcessor {
@@ -64,7 +67,12 @@ public class JsonWriterProcessor extends AbstractProcessor {
 
       try {
         for (Element o : elementsAnnotatedWith) {
+          Instant start = Instant.now();
           generate(o);
+          Duration duration = Duration.between(start, Instant.now());
+          processingEnv
+              .getMessager()
+              .printMessage(Diagnostic.Kind.NOTE, "%s: processing time %s".formatted(o, duration));
         }
       } catch (Exception e) {
         throw new GenerationException(e);
