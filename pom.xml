@@ -33,6 +33,9 @@
 
   <properties>
     <compile-testing.version>1.2.0</compile-testing.version>
+
+    <!--plugins-->
+    <flatten-maven-plugin.version>1.7.0</flatten-maven-plugin.version>
   </properties>
 
   <dependencyManagement>
