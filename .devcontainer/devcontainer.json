@@ -5,7 +5,7 @@
       "version": "21",
       "jdkDistro": "tem",
       "installMaven": true,
-      "mavenVersion": "3.9.9"
+      "mavenVersion": "3.9.10"
     },
     "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {
       "installDockerBuildx": true,
