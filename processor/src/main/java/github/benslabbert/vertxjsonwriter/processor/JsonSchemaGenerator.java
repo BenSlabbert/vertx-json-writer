@@ -30,7 +30,7 @@ class JsonSchemaGenerator {
 
   private static void writeValidatorMethod(PrintWriter out) {
     out.println(
-        """
+"""
     public static Validator getValidator() {
         return Validator.create(
             schema(),
@@ -45,7 +45,7 @@ class JsonSchemaGenerator {
 
   private static void writeSchemaMethod(PrintWriter out) {
     out.println(
-        """
+"""
     static JsonSchema schema() {
         return JsonSchema.of(schemaBuilder().toJson());
     }
@@ -55,7 +55,7 @@ class JsonSchemaGenerator {
 
   private static void writeSchemaBuilderMethodStart(PrintWriter out) {
     out.println(
-        """
+"""
 static ObjectSchemaBuilder schemaBuilder() {
     return objectSchema()
 """);
