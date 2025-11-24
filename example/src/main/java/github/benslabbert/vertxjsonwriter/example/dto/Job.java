@@ -22,7 +22,7 @@ public record Job(String name) {
   }
 
   static ObjectSchemaBuilder schemaBuilder() {
-    return PrimitiveEntity_JsonWriter.schemaBuilder();
+    return Job_JsonWriter.schemaBuilder();
   }
 
   @AutoBuilder

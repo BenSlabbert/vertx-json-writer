@@ -24,7 +24,7 @@ public record WithAnnotations(@NotBlank @Size(min = 1, max = 10) String name) {
   }
 
   static ObjectSchemaBuilder schemaBuilder() {
-    return null;
+    return WithAnnotations_JsonWriter.schemaBuilder();
   }
 
   @AutoBuilder

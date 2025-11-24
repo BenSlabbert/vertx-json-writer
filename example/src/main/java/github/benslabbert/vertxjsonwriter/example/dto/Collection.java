@@ -36,7 +36,7 @@ public record Collection(
   }
 
   static ObjectSchemaBuilder schemaBuilder() {
-    return PrimitiveEntity_JsonWriter.schemaBuilder();
+    return Collection_JsonWriter.schemaBuilder();
   }
 
   @AutoBuilder

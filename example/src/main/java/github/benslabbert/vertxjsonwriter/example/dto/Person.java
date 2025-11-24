@@ -22,7 +22,7 @@ public record Person(String name, int age, boolean bool, Job job) {
   }
 
   static ObjectSchemaBuilder schemaBuilder() {
-    return PrimitiveEntity_JsonWriter.schemaBuilder();
+    return Person_JsonWriter.schemaBuilder();
   }
 
   @AutoBuilder

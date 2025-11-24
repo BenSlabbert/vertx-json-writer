@@ -22,7 +22,7 @@ public record Complex(Long longValue, long longPrimitiveValue, String stringValu
   }
 
   static ObjectSchemaBuilder schemaBuilder() {
-    return PrimitiveEntity_JsonWriter.schemaBuilder();
+    return Complex_JsonWriter.schemaBuilder();
   }
 
   @AutoBuilder
