@@ -3,8 +3,6 @@ package github.benslabbert.vertxjsonwriter.example.dto;
 
 import com.google.auto.value.AutoBuilder;
 import github.benslabbert.vertxjsonwriter.annotation.JsonWriter;
-import io.vertx.core.json.JsonObject;
-import io.vertx.json.schema.common.dsl.ObjectSchemaBuilder;
 
 @JsonWriter
 public record PrimitiveEntity(
@@ -20,18 +18,6 @@ public record PrimitiveEntity(
 
   public static PrimitiveEntity.Builder builder() {
     return new AutoBuilder_PrimitiveEntity_Builder();
-  }
-
-  public static PrimitiveEntity fromJson(JsonObject json) {
-    return PrimitiveEntity_JsonWriter.fromJson(json);
-  }
-
-  public JsonObject toJson() {
-    return PrimitiveEntity_JsonWriter.toJson(this);
-  }
-
-  static ObjectSchemaBuilder schemaBuilder() {
-    return PrimitiveEntity_JsonWriter.schemaBuilder();
   }
 
   @AutoBuilder

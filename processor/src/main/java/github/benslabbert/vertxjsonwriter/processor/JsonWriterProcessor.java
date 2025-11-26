@@ -148,7 +148,7 @@ public class JsonWriterProcessor extends AbstractProcessor {
 
     // simpleClassName this will be what we return from our method
     String simpleClassName = annotatedClassName.substring(lastDot + 1);
-    String builderClassName = annotatedClassName + "_JsonWriter";
+    String builderClassName = annotatedClassName + "Json";
     String builderSimpleClassName = builderClassName.substring(lastDot + 1);
 
     // 8k should be big enough for most files without needing a resize

@@ -3,26 +3,12 @@ package github.benslabbert.vertxjsonwriter.example;
 
 import com.google.auto.value.AutoBuilder;
 import github.benslabbert.vertxjsonwriter.annotation.JsonWriter;
-import io.vertx.core.json.JsonObject;
-import io.vertx.json.schema.common.dsl.ObjectSchemaBuilder;
 
 @JsonWriter
 public record NestedDto(String name, InnerDto innerDto) {
 
   public static Builder builder() {
     return new AutoBuilder_NestedDto_Builder();
-  }
-
-  public static NestedDto fromJson(JsonObject json) {
-    return NestedDto_JsonWriter.fromJson(json);
-  }
-
-  public JsonObject toJson() {
-    return NestedDto_JsonWriter.toJson(this);
-  }
-
-  static ObjectSchemaBuilder schemaBuilder() {
-    return NestedDto_JsonWriter.schemaBuilder();
   }
 
   @AutoBuilder
@@ -40,18 +26,6 @@ public record NestedDto(String name, InnerDto innerDto) {
 
     public static Builder builder() {
       return new AutoBuilder_NestedDto_InnerDto_Builder();
-    }
-
-    public static InnerDto fromJson(JsonObject json) {
-      return NestedDto_InnerDto_JsonWriter.fromJson(json);
-    }
-
-    public JsonObject toJson() {
-      return NestedDto_InnerDto_JsonWriter.toJson(this);
-    }
-
-    static ObjectSchemaBuilder schemaBuilder() {
-      return NestedDto_InnerDto_JsonWriter.schemaBuilder();
     }
 
     @AutoBuilder

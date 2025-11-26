@@ -46,7 +46,7 @@ class JsonSchemaGenerator {
   private static void writeSchemaMethod(PrintWriter out) {
     out.println(
 """
-    static JsonSchema schema() {
+    private static JsonSchema schema() {
         return JsonSchema.of(schemaBuilder().toJson());
     }
 """);
@@ -56,7 +56,7 @@ class JsonSchemaGenerator {
   private static void writeSchemaBuilderMethodStart(PrintWriter out) {
     out.println(
 """
-static ObjectSchemaBuilder schemaBuilder() {
+public static ObjectSchemaBuilder schemaBuilder() {
     return objectSchema()
 """);
     out.println();

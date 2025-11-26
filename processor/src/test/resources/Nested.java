@@ -2,8 +2,6 @@
 package my.test;
 
 import github.benslabbert.vertxjsonwriter.annotation.JsonWriter;
-import io.vertx.core.json.JsonObject;
-import io.vertx.json.schema.common.dsl.ObjectSchemaBuilder;
 
 @JsonWriter
 public record Nested(String name, Inner inner) {
@@ -22,18 +20,6 @@ public record Nested(String name, Inner inner) {
 
   @JsonWriter
   public record Inner(String innerName) {
-
-    public static Inner fromJson(JsonObject json) {
-      return new Inner("innerName");
-    }
-
-    public JsonObject toJson() {
-      return new JsonObject();
-    }
-
-    static ObjectSchemaBuilder schemaBuilder() {
-      return null;
-    }
 
     public static Builder builder() {
       return null;

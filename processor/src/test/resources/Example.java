@@ -2,9 +2,6 @@
 package my.test;
 
 import github.benslabbert.vertxjsonwriter.annotation.JsonWriter;
-import io.vertx.core.json.JsonObject;
-import io.vertx.json.schema.Validator;
-import io.vertx.json.schema.common.dsl.ObjectSchemaBuilder;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -26,22 +23,6 @@ public record Example(
 
   public static Builder builder() {
     return null;
-  }
-
-  public static Example fromJson(JsonObject json) {
-    return Example_JsonWriter.fromJson(json);
-  }
-
-  public JsonObject toJson() {
-    return Example_JsonWriter.toJson(this);
-  }
-
-  public static Validator getValidator() {
-    return Example_JsonWriter.getValidator();
-  }
-
-  static ObjectSchemaBuilder schemaBuilder() {
-    return Example_JsonWriter.schemaBuilder();
   }
 
   public interface Builder {
