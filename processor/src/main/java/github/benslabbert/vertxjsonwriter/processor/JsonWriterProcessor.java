@@ -3,7 +3,6 @@ package github.benslabbert.vertxjsonwriter.processor;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.io.CharSink;
-import com.google.common.io.CharSource;
 import com.google.googlejavaformat.java.Formatter;
 import com.google.googlejavaformat.java.FormatterException;
 import com.google.googlejavaformat.java.JavaFormatterOptions;
@@ -22,8 +21,6 @@ import io.vertx.json.schema.common.dsl.StringFormat;
 import jakarta.annotation.Nonnull;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.io.Reader;
-import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.time.Duration;
@@ -78,21 +75,6 @@ public class JsonWriterProcessor extends AbstractProcessor {
     }
 
     return true;
-  }
-
-  private static class StringSource extends CharSource {
-
-    private final StringWriter writer;
-
-    private StringSource(StringWriter writer) {
-      this.writer = writer;
-    }
-
-    @Nonnull
-    @Override
-    public Reader openStream() {
-      return new StringReader(writer.toString());
-    }
   }
 
   private static class FileSink extends CharSink {
@@ -234,7 +216,6 @@ public class JsonWriterProcessor extends AbstractProcessor {
 
   private void formatFile(StringWriter writer, JavaFileObject builderFile) {
     try {
-      CharSource source = new StringSource(writer);
       CharSink output = new FileSink(builderFile);
 
       JavaFormatterOptions options =
@@ -245,7 +226,8 @@ public class JsonWriterProcessor extends AbstractProcessor {
               .build();
 
       Instant start = Instant.now();
-      new Formatter(options).formatSource(source, output);
+      String s = new Formatter(options).formatSourceAndFixImports(writer.toString());
+      output.write(s);
       processingEnv
           .getMessager()
           .printMessage(
