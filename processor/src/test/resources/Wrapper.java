@@ -1,11 +1,7 @@
 /* Licensed under Apache-2.0 2024. */
 package my.test;
 
-import com.google.auto.value.AutoBuilder;
 import github.benslabbert.vertxjsonwriter.annotation.JsonWriter;
-import io.vertx.core.json.JsonObject;
-import io.vertx.json.schema.Validator;
-import io.vertx.json.schema.common.dsl.ObjectSchemaBuilder;
 
 @JsonWriter
 public record Wrapper(
@@ -15,23 +11,6 @@ public record Wrapper(
     return null;
   }
 
-  public static Wrapper fromJson(JsonObject json) {
-    return Wrapper_JsonWriter.fromJson(json);
-  }
-
-  public JsonObject toJson() {
-    return Wrapper_JsonWriter.toJson(this);
-  }
-
-  public static Validator getValidator() {
-    return Wrapper_JsonWriter.getValidator();
-  }
-
-  public static ObjectSchemaBuilder schemaBuilder() {
-    return Wrapper_JsonWriter.schemaBuilder();
-  }
-
-  @AutoBuilder
   public interface Builder {
     Builder number(Integer number);
 

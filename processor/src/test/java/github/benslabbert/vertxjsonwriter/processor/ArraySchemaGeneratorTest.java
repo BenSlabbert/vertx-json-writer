@@ -108,7 +108,7 @@ class ArraySchemaGeneratorTest {
                 null),
             ".requiredProperty(\"testField\", arraySchema()\n"
                 + ".items(\n"
-                + "TestObject.schemaBuilder()\n"
+                + "TestObjectJson.schemaBuilder()\n"
                 + "))"));
   }
 

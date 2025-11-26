@@ -2,6 +2,7 @@
 package github.benslabbert.vertxjsonwriter.processor;
 
 import static github.benslabbert.vertxjsonwriter.processor.Util.getGenericType;
+import static github.benslabbert.vertxjsonwriter.processor.Util.simpleName;
 
 import java.io.PrintWriter;
 import java.util.List;
@@ -35,7 +36,7 @@ final class ToJsonGenerator {
       } else if (className.startsWith("java.util.Collection")) {
         iterableToJson(out, property.name(), property.className(), property.nullable());
       } else {
-        out.printf("json.put(\"%s\", o.%s().toJson());%n", name, name);
+        out.printf("json.put(\"%s\", %sJson.toJson(o.%s()));%n", name, simpleName(className), name);
       }
     }
 
@@ -98,7 +99,8 @@ final class ToJsonGenerator {
     if (genericType.startsWith("java.lang.")) {
       out.printf("%s.add(i);%n", name);
     } else {
-      out.printf("%s.add(i.toJson());%n", name);
+      var s = genericType.substring(genericType.lastIndexOf('.') + 1);
+      out.printf("%s.add(%sJson.toJson(i));%n", name, s);
     }
 
     out.println("}");

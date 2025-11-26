@@ -3,9 +3,6 @@ package github.benslabbert.vertxjsonwriter.example.schema;
 
 import com.google.auto.value.AutoBuilder;
 import github.benslabbert.vertxjsonwriter.annotation.JsonWriter;
-import io.vertx.core.json.JsonObject;
-import io.vertx.json.schema.Validator;
-import io.vertx.json.schema.common.dsl.ObjectSchemaBuilder;
 import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -33,22 +30,6 @@ public record Request(
 
   public static Builder builder() {
     return new AutoBuilder_Request_Builder();
-  }
-
-  public static Request fromJson(JsonObject json) {
-    return Request_JsonWriter.fromJson(json);
-  }
-
-  public JsonObject toJson() {
-    return Request_JsonWriter.toJson(this);
-  }
-
-  public static Validator getValidator() {
-    return Request_JsonWriter.getValidator();
-  }
-
-  static ObjectSchemaBuilder schemaBuilder() {
-    return Request_JsonWriter.schemaBuilder();
   }
 
   @AutoBuilder

@@ -16,25 +16,25 @@ class ObjectSchemaGeneratorTest {
         Arguments.of(
             "Basic Required Property",
             new ObjectSchemaGenerator("testField", true, "TestObject"),
-            ".requiredProperty(\"testField\", TestObject.schemaBuilder())"),
+            ".requiredProperty(\"testField\", TestObjectJson.schemaBuilder())"),
 
         // testBasicOptionalProperty
         Arguments.of(
             "Basic Optional Property",
             new ObjectSchemaGenerator("testField", false, "TestObject"),
-            ".property(\"testField\", TestObject.schemaBuilder())"),
+            ".property(\"testField\", TestObjectJson.schemaBuilder())"),
 
         // testNullFieldName
         Arguments.of(
             "Null Field Name",
             new ObjectSchemaGenerator(null, false, "TestObject"),
-            "TestObject.schemaBuilder()"),
+            "TestObjectJson.schemaBuilder()"),
 
         // testDifferentObjectClassName
         Arguments.of(
             "Different Object Class Name",
             new ObjectSchemaGenerator("testField", true, "AnotherObject"),
-            ".requiredProperty(\"testField\", AnotherObject.schemaBuilder())"));
+            ".requiredProperty(\"testField\", AnotherObjectJson.schemaBuilder())"));
   }
 
   @ParameterizedTest(name = "{0}")

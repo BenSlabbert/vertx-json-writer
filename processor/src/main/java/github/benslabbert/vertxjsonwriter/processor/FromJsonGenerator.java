@@ -2,6 +2,7 @@
 package github.benslabbert.vertxjsonwriter.processor;
 
 import static github.benslabbert.vertxjsonwriter.processor.Util.getGenericType;
+import static github.benslabbert.vertxjsonwriter.processor.Util.simpleName;
 
 import java.io.PrintWriter;
 import java.util.List;
@@ -57,8 +58,7 @@ class FromJsonGenerator {
       return timeGetter(name, className, nullable);
     }
 
-    // if this is an inner class we need to fix the name
-    return "%s.fromJson(json.getJsonObject(\"%s\"))".formatted(simpleName(className), name);
+    return "%sJson.fromJson(json.getJsonObject(\"%s\"))".formatted(simpleName(className), name);
   }
 
   private static String collectionGetter(String name, String className) {
@@ -90,7 +90,7 @@ class FromJsonGenerator {
       case "java.lang.Double" ->
           "json.getJsonArray(\"%s\").stream().map(d -> (Double) d).%s".formatted(name, collector);
       default ->
-          "json.getJsonArray(\"%s\").stream().map(obj -> %s.fromJson((JsonObject) obj)).%s"
+          "json.getJsonArray(\"%s\").stream().map(obj -> %sJson.fromJson((JsonObject) obj)).%s"
               .formatted(name, getSimpleName(genericType), collector);
     };
   }
@@ -153,19 +153,6 @@ class FromJsonGenerator {
       case BYTE -> "json.getBinary(\"%s\")[0]".formatted(name);
       default -> throw new GenerationException("Unsupported primitive type: " + kind);
     };
-  }
-
-  private static String simpleName(String classname) {
-    // my.test.Nested.Inner
-    // if this is an inner type, return Nested.Inner
-    int firstClassIdx = 0;
-    for (int i = 0; i < classname.length(); i++) {
-      if (Character.isUpperCase(classname.charAt(i))) {
-        firstClassIdx = i;
-        break;
-      }
-    }
-    return classname.substring(firstClassIdx);
   }
 
   private static String getSimpleName(String canonicalName) {
